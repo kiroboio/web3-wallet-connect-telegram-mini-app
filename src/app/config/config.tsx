@@ -30,4 +30,5 @@ export const config = defaultWagmiConfig({
   storage: createStorage({
     storage: cookieStorage
   }),
+  
 });
