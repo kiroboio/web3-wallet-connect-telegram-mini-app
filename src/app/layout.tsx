@@ -23,7 +23,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Web3ModalProvider initialState={{ ...initialState, open: true }}>
+        <Web3ModalProvider initialState={initialState}>
           {children}
         </Web3ModalProvider>
       </body>
