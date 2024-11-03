@@ -31,6 +31,13 @@ class SecureLocalStorage {
     return wallet.address;
   }
 
+  public signMessage = async (message: string) => {
+    const wallet = this.userWallet;
+    if (!wallet) return;
+
+    return await wallet.signMessage(message);
+  };
+
   public lock = () => {
     ls.clear();
     this.updateSubscriptions();

@@ -44,6 +44,9 @@ importers:
       secure-ls:
         specifier: ^2.0.0
         version: 2.0.0
+      socket.io-client:
+        specifier: ^4.8.1
+        version: 4.8.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       viem:
         specifier: ^2.21.37
         version: 2.21.37(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.22.4)
