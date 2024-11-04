@@ -20,11 +20,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Suspense fallback={<Spinner size={24} />}>
-        <SecureStorageProvider>
-          <body className={inter.className}>{children}</body>
-        </SecureStorageProvider>
-      </Suspense>
+      <body className={inter.className}>
+        <Suspense fallback={<Spinner size={24} />}>
+          <SecureStorageProvider>
+            {children}
+          </SecureStorageProvider>
+        </Suspense>
+      </body>
     </html>
   );
 }
