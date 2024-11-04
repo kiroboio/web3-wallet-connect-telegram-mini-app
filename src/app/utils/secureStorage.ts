@@ -8,6 +8,7 @@ type Observer = { key: string; callback: (ss: SecureLocalStorage) => void };
 export enum SCHEMA {
   PASSWORD = "password",
   ENCRYPTED_PRIVATE_KEY = "encryptedPrivateKey",
+  ADDRESS = "address"
 }
 
 export class SecureLocalStorage {
@@ -25,10 +26,16 @@ export class SecureLocalStorage {
 
     const { wallet } = getUserWallet(decrypt(key, pass));
 
+    this.storeData(SCHEMA.ADDRESS, wallet.address)
     return wallet;
   }
 
   public get address() {
+
+    const address = this.getData(SCHEMA.ADDRESS) 
+
+    if(address) return address
+
     const wallet = this.userWallet;
     if (!wallet) return;
 
@@ -47,12 +54,12 @@ export class SecureLocalStorage {
     this.ls.clear();
     this.updateSubscriptions();
   };
-  public storeData = (key: string, value: string) => {
+  public storeData = (key: SCHEMA, value: string) => {
     this.ls.set(key, value);
     this.updateSubscriptions();
   };
 
-  public getData = (key: string): string | null => {
+  public getData = (key: SCHEMA): string | null => {
     return this.ls.get(key);
   };
 
@@ -67,7 +74,7 @@ export class SecureLocalStorage {
     this.observers.clear();
   };
 
-  private updateSubscriptions = () => {
+  public updateSubscriptions = () => {
     this.observers.forEach(({ callback }) => callback(this));
   };
   private observers: Map<string, Observer> = new Map();

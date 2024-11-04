@@ -2,10 +2,11 @@
 
 import { encrypt } from "@/app/utils/encryption";
 import { createNewUserWallet } from "@/app/utils/getUserWallet";
-import { useSecureStorage } from "@/app/utils/useSecureStorage";
+import { useSecureStorage } from "../../context/SecureStorageProvider";
 
 import React, { useState } from "react";
 import { FaLock, FaInfoCircle } from "react-icons/fa";
+import { SCHEMA } from "@/app/utils/secureStorage";
 
 interface CreateWalletModalProps {
   isOpen: boolean;
@@ -26,8 +27,8 @@ export const CreateWalletModal: React.FC<CreateWalletModalProps> = ({
     try {
       const { wallet } = createNewUserWallet();
 
-      storeData("password", password);
-      storeData("encryptedPrivateKey", encrypt(wallet.privateKey, password)); // Placeholder for encrypted private key
+      storeData(SCHEMA.PASSWORD, password);
+      storeData(SCHEMA.ENCRYPTED_PRIVATE_KEY, encrypt(wallet.privateKey, password)); // Placeholder for encrypted private key
     } catch (e) {
 
       const error = e as { message: string } | undefined

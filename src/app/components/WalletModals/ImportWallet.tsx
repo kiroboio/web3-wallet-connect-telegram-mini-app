@@ -1,7 +1,8 @@
 import { encrypt } from "@/app/utils/encryption";
-import { useSecureStorage } from "@/app/utils/useSecureStorage";
+import { useSecureStorage } from "../../context/SecureStorageProvider";
 import React, { useState } from "react";
 import { FaLock, FaInfoCircle } from "react-icons/fa";
+import { SCHEMA } from "@/app/utils/secureStorage";
 
 interface ImportWalletModalProps {
   isOpen: boolean;
@@ -23,10 +24,10 @@ export const ImportWalletModal: React.FC<ImportWalletModalProps> = ({
     if (!privateKey) return;
     if(!storeData) return
     try {
-      storeData("password", password);
+      storeData(SCHEMA.PASSWORD, password);
 
       const enctyptedPrivatekey = encrypt(privateKey, password);
-      storeData("encryptedPrivateKey", enctyptedPrivatekey);
+      storeData(SCHEMA.ENCRYPTED_PRIVATE_KEY, enctyptedPrivatekey);
     } catch (e) {
       const error = e as { message: string } | undefined
       console.error(error?.message);

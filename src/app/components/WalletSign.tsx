@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useSocket } from "../context/SocketProvider";
-import { useSecureStorage } from "../utils/useSecureStorage";
+import { useSecureStorage } from "../context/SecureStorageProvider";
 
 
 export const WalletSign = ({ userId }: { userId?: string | null }) => {
