@@ -26,8 +26,9 @@ export const ImportWalletModal: React.FC<ImportWalletModalProps> = ({
 
       const enctyptedPrivatekey = encrypt(privateKey, password);
       storeData("encryptedPrivateKey", enctyptedPrivatekey);
-    } catch (e: any) {
-      console.error(e?.message);
+    } catch (e) {
+      const error = e as { message: string } | undefined
+      console.error(error?.message);
       secureLocalStorage.lock();
     }
     onClose();

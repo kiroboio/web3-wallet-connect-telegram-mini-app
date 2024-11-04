@@ -1,11 +1,10 @@
 import React from "react";
 import { FaInfoCircle } from "react-icons/fa";
 
-interface InfoTooltipProps {}
 
 const MESSAGE =
   "Your private key will be encrypted with your password and stored in your local storage. We will not store your password or private key. If you lose your private key, it will be lost forever.";
-export const InfoTooltip: React.FC<InfoTooltipProps> = () => {
+export const InfoTooltip: React.FC = () => {
   return (
     <div className="relative group">
       <FaInfoCircle className="text-blue-500 cursor-pointer" />

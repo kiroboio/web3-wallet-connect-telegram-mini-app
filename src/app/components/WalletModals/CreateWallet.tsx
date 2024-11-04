@@ -26,8 +26,10 @@ export const CreateWalletModal: React.FC<CreateWalletModalProps> = ({
 
       storeData("password", password);
       storeData("encryptedPrivateKey", encrypt(wallet.privateKey, password)); // Placeholder for encrypted private key
-    } catch (e: any) {
-      console.error(e?.message);
+    } catch (e) {
+
+      const error = e as { message: string } | undefined
+      console.error(error?.message);
       secureLocalStorage.lock();
     }
     onClose();

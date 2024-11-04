@@ -1,7 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
 import { FaWallet } from 'react-icons/fa'; // Example icon
-import { InfoTooltip } from './WalletModals/Tooltip';
 
 interface WalletButtonProps {
   label: string;

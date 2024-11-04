@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useSocket } from "../context/SocketProvider";
-import { ethers } from "ethers";
 import { secureLocalStorage } from "../utils/secureStorage";
 
 export const WalletSign = ({ userId }: { userId?: string | null }) => {
