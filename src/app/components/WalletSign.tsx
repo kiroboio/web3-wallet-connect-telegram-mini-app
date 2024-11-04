@@ -1,17 +1,18 @@
 import { useEffect } from "react";
 import { useSocket } from "../context/SocketProvider";
-import { secureLocalStorage } from "../utils/secureStorage";
+import { useSecureStorage } from "../utils/useSecureStorage";
+
 
 export const WalletSign = ({ userId }: { userId?: string | null }) => {
   const { socket } = useSocket();
-
+  const secureLocalStorage = useSecureStorage()
   useEffect(() => {
     if (!socket) return;
     if (!userId) return;
 
     // Listen for sign requests
     socket.on("signRequest", async ({ message }) => {
-      if (!secureLocalStorage.address) {
+      if (!secureLocalStorage?.address) {
         alert("No wallet found!");
         return;
       }
@@ -25,7 +26,7 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
     return () => {
       socket.off("signRequest");
     };
-  }, [socket, userId]);
+  }, [socket, userId, secureLocalStorage]);
 
   return null; // This component doesn't render anything
 };

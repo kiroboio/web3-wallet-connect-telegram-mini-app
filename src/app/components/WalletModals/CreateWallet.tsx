@@ -2,7 +2,8 @@
 
 import { encrypt } from "@/app/utils/encryption";
 import { createNewUserWallet } from "@/app/utils/getUserWallet";
-import { secureLocalStorage } from "@/app/utils/secureStorage";
+import { useSecureStorage } from "@/app/utils/useSecureStorage";
+
 import React, { useState } from "react";
 import { FaLock, FaInfoCircle } from "react-icons/fa";
 
@@ -15,12 +16,13 @@ export const CreateWalletModal: React.FC<CreateWalletModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const secureLocalStorage = useSecureStorage()
   const [password, setPassword] = useState("");
-  const { storeData } = secureLocalStorage;
+  const storeData = secureLocalStorage?.storeData;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    if(!storeData) return
     try {
       const { wallet } = createNewUserWallet();
 
@@ -30,7 +32,7 @@ export const CreateWalletModal: React.FC<CreateWalletModalProps> = ({
 
       const error = e as { message: string } | undefined
       console.error(error?.message);
-      secureLocalStorage.lock();
+      secureLocalStorage?.lock();
     }
     onClose();
   };

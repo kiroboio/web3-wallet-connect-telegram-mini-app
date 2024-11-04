@@ -2,7 +2,6 @@ import SecureLS from "secure-ls";
 import { getUserWallet } from "./getUserWallet";
 import { decrypt } from "./encryption";
 
-export const ls = new SecureLS({ encodingType: "aes" });
 
 type Observer = { key: string; callback: (ss: SecureLocalStorage) => void };
 
@@ -11,7 +10,12 @@ export enum SCHEMA {
   ENCRYPTED_PRIVATE_KEY = "encryptedPrivateKey",
 }
 
-class SecureLocalStorage {
+export class SecureLocalStorage {
+
+  private ls: SecureLS
+  constructor() {
+    this.ls = new SecureLS({ encodingType: 'aes'})
+  }
   public get userWallet() {
     const pass = this.getData(SCHEMA.PASSWORD);
     if (!pass) return;
@@ -31,6 +35,7 @@ class SecureLocalStorage {
     return wallet.address;
   }
 
+
   public signMessage = async (message: string) => {
     const wallet = this.userWallet;
     if (!wallet) return;
@@ -39,16 +44,16 @@ class SecureLocalStorage {
   };
 
   public lock = () => {
-    ls.clear();
+    this.ls.clear();
     this.updateSubscriptions();
   };
   public storeData = (key: string, value: string) => {
-    ls.set(key, value);
+    this.ls.set(key, value);
     this.updateSubscriptions();
   };
 
   public getData = (key: string): string | null => {
-    return ls.get(key);
+    return this.ls.get(key);
   };
 
   public subscribe = ({ key, callback }: Observer) => {
@@ -68,4 +73,3 @@ class SecureLocalStorage {
   private observers: Map<string, Observer> = new Map();
 }
 
-export const secureLocalStorage = new SecureLocalStorage();
