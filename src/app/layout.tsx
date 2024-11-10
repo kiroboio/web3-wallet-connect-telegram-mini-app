@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
+import { SecureStorageProvider } from "./context/SecureStorageProvider";
+import { Spinner } from "./components/Spinner";
+
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -16,8 +20,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
-      
+      <body className={inter.className}>
+        <Suspense fallback={<Spinner size={24} />}>
+          <SecureStorageProvider>
+            {children}
+          </SecureStorageProvider>
+        </Suspense>
+      </body>
     </html>
   );
 }

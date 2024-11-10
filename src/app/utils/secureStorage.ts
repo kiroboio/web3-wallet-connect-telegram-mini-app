@@ -2,16 +2,21 @@ import SecureLS from "secure-ls";
 import { getUserWallet } from "./getUserWallet";
 import { decrypt } from "./encryption";
 
-export const ls = new SecureLS({ encodingType: "aes" });
 
 type Observer = { key: string; callback: (ss: SecureLocalStorage) => void };
 
 export enum SCHEMA {
   PASSWORD = "password",
   ENCRYPTED_PRIVATE_KEY = "encryptedPrivateKey",
+  ADDRESS = "address"
 }
 
-class SecureLocalStorage {
+export class SecureLocalStorage {
+
+  private ls: SecureLS
+  constructor() {
+    this.ls = new SecureLS({ encodingType: 'aes'})
+  }
   public get userWallet() {
     const pass = this.getData(SCHEMA.PASSWORD);
     if (!pass) return;
@@ -21,10 +26,16 @@ class SecureLocalStorage {
 
     const { wallet } = getUserWallet(decrypt(key, pass));
 
+    this.storeData(SCHEMA.ADDRESS, wallet.address)
     return wallet;
   }
 
   public get address() {
+
+    const address = this.getData(SCHEMA.ADDRESS) 
+
+    if(address) return address
+
     const wallet = this.userWallet;
     if (!wallet) return;
 
@@ -39,16 +50,16 @@ class SecureLocalStorage {
   };
 
   public lock = () => {
-    ls.clear();
+    this.ls.clear();
     this.updateSubscriptions();
   };
-  public storeData = (key: string, value: string) => {
-    ls.set(key, value);
+  public storeData = (key: SCHEMA, value: string) => {
+    this.ls.set(key, value);
     this.updateSubscriptions();
   };
 
-  public getData = (key: string): string | null => {
-    return ls.get(key);
+  public getData = (key: SCHEMA): string | null => {
+    return this.ls.get(key);
   };
 
   public subscribe = ({ key, callback }: Observer) => {
@@ -62,10 +73,9 @@ class SecureLocalStorage {
     this.observers.clear();
   };
 
-  private updateSubscriptions = () => {
+  public updateSubscriptions = () => {
     this.observers.forEach(({ callback }) => callback(this));
   };
   private observers: Map<string, Observer> = new Map();
 }
 
-export const secureLocalStorage = new SecureLocalStorage();

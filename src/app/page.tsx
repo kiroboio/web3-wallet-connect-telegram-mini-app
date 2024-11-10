@@ -6,32 +6,40 @@ import { FaLock, FaWallet } from "react-icons/fa";
 import { IconWithText } from "./components/IconWithText";
 import { ImportWalletModal } from "./components/WalletModals/ImportWallet";
 import { CreateWalletModal } from "./components/WalletModals/CreateWallet";
-import { secureLocalStorage } from "./utils/secureStorage";
+
 import WalletAddress from "./components/WaletAddress";
 import { SocketProvider } from "./context/SocketProvider";
 import { useSearchParams } from "next/navigation";
 import { WalletSign } from "./components/WalletSign";
+import { useSecureStorage } from "./context/SecureStorageProvider";
+import { Spinner } from "./components/Spinner";
+
 
 export default function Home() {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  const secureLocalStorage = useSecureStorage()
   const [walletAddress, setWalletAddress] = useState(
-    secureLocalStorage.address
+    secureLocalStorage?.address
   );
   const searchParams = useSearchParams();
 
   const userId = searchParams.get("userId");
 
+  // console.log({ address: secureLocalStorage?.address })
   useEffect(() => {
-    secureLocalStorage.subscribe({
+    setWalletAddress(secureLocalStorage?.address)
+    secureLocalStorage?.subscribe({
       key: "wallet_address",
       callback: (secureStorage) => {
         setWalletAddress(secureStorage.address);
       },
     });
-  }, []);
+  }, [secureLocalStorage]);
 
   const renderWalletButtons = () => {
+    if (!secureLocalStorage) return <Spinner size={24} />
     if (!walletAddress) {
       return (
         <div className="flex flex-col justify-end items-end pt-4 pb-4 px-2">
@@ -54,7 +62,7 @@ export default function Home() {
     return (
       <div className="flex flex-col justify-end items-end pt-4 pb-4 px-2">
         <div className="py-2">
-          <WalletButton
+          {secureLocalStorage ? <WalletButton
             label="lock"
             onClick={secureLocalStorage.lock}
             icon={
@@ -63,11 +71,22 @@ export default function Home() {
                 size={16}
               />
             }
-          />
+          /> : null}
         </div>
       </div>
     );
   };
+
+  const getWalletInfo = () => {
+    if (!secureLocalStorage) {
+
+      return <Spinner size={24} />
+    }
+
+    if (!walletAddress) return "Not Connected"
+
+    return <WalletAddress address={walletAddress} />
+  }
   return (
     <SocketProvider userId={Number(userId)}>
       <main className="min-h-screen py-0 pb-12 flex-1 flex flex-col items-center bg-white">
@@ -81,11 +100,7 @@ export default function Home() {
                 />
               }
               text={
-                walletAddress ? (
-                  <WalletAddress address={walletAddress} />
-                ) : (
-                  "Not Connected"
-                )
+                getWalletInfo()
               }
               hasData={Boolean(walletAddress)}
             />
