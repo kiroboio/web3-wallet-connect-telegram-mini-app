@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useSocket } from "../context/SocketProvider";
-import { ethers } from "ethers";
+import { ethers, getBytes } from "ethers";
 import { secureLocalStorage } from "../utils/secureStorage";
 
 export const WalletSign = ({ userId }: { userId?: string | null }) => {
@@ -11,16 +11,16 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
     if (!userId) return;
 
     // Listen for sign requests
-    socket.on("signRequest", async ({ message }) => {
+    socket.on("signRequest", async ({ message, encodedValues, intentId  }) => {
       if (!secureLocalStorage.address) {
         alert("No wallet found!");
         return;
       }
 
-      const signature = await secureLocalStorage.signMessage(message);
+      const signature = await secureLocalStorage.signMessage(getBytes(message));
 
-      console.log({ signature });
-      socket.emit("signedMessage", { userId: Number(userId), signature });
+      socket.emit("signedMessage", { userId: Number(userId), signature, encodedValues, intentId  });
+      console.log({ signature, encodedValues, intentId, message  });
     });
 
     return () => {

@@ -31,7 +31,7 @@ class SecureLocalStorage {
     return wallet.address;
   }
 
-  public signMessage = async (message: string) => {
+  public signMessage = async (message: string | Uint8Array) => {
     const wallet = this.userWallet;
     if (!wallet) return;
 
