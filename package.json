@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ethersproject/providers": "^5.7.2",
     "@reown/appkit": "^1.2.0",
     "@reown/appkit-adapter-wagmi": "^1.2.0",
     "@tanstack/react-query": "^5.59.16",
