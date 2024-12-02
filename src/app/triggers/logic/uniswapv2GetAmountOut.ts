@@ -1,7 +1,6 @@
 import { ethers, BigNumber } from "ethers";
 import { ChainId, getProvider } from "../provider/provider";
 import { UniswapHelper } from "@kiroboio/fct-plugins";
-import { WETH9 } from "@uniswap/sdk-core";
 import { getCreate2Address } from "ethers/lib/utils";
 import { keccak256, pack } from "@ethersproject/solidity";
 import { INIT_CODE_HASH } from "@uniswap/v2-sdk";
@@ -25,19 +24,22 @@ export const FACTORY_V2_ADDRESSES: Record<ChainId, string> = {
 
 export const getSwapQuote = async ({
   chainId,
-
+  fromToken,
   toToken,
   recipient,
   amount,
 }: {
   chainId: ChainId;
-  fromToken: string;
   fromDecimals: number;
-  toToken: string;
   toDecimals: number;
   recipient: string;
   amount: string;
+  fromToken?: string;
+  toToken?: string;
 }) => {
+  if (!fromToken) return
+  if (!toToken) return
+  
   const provider = getProvider(chainId);
   const uniswapHelper = new UniswapHelper({
     chainId,
@@ -68,10 +70,6 @@ export const getSwapQuote = async ({
       ? [reserves[0], reserves[1], token0, token1]
       : [reserves[1], reserves[0], token0, token1];
   };
-
-  const weth = WETH9[Number(chainId)].address;
-
-  const fromToken = weth;
 
   const pairAddress = getCreate2Address(
     FACTORY_V2_ADDRESSES[chainId],
