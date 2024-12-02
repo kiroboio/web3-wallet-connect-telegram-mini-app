@@ -15,6 +15,13 @@ export type ExternalVariables =
   })[]
   | undefined;
 
+
+export type TriggerSubscriptionParams = {
+  triggerId: string;
+  intentId: string;
+  externalVariables: ExternalVariables;
+  type: TriggerType;
+}
 export type TriggerType =
   | "TRANSACTION_EXECUTE_ONLY"
   | "STRATAGY"

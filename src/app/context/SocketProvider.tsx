@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useSecureStorage } from "./SecureStorageProvider";
+import { SCHEMA } from "../utils/secureStorage";
 
 interface SocketContextProps {
   socket: Socket | null;
@@ -19,7 +20,7 @@ export const SocketProvider: React.FC<{
   useEffect(() => {
     // Initialize Socket.IO client
     if (!userId) return;
-   if (!secureLocalStorage?.address) return;
+    if (!secureLocalStorage?.address) return;
 
     const newSocket = io(
       process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:4000",
@@ -38,19 +39,24 @@ export const SocketProvider: React.FC<{
         wallet: secureLocalStorage?.address,
         vault: secureLocalStorage?.vault,
       });
+
+      const triggers = secureLocalStorage?.getTriggersData(SCHEMA.TRIGGER)
+      if (!triggers) return
+
+      Object.keys(triggers).forEach((key) => {
+        const trigger = triggers[key]
+        newSocket.emit("reconnectTrigger", trigger)
+      })
     });
 
-    newSocket.on("disconnect", () => {
-      console.log("Disconnected from Socket.IO server");
-      newSocket.disconnect()
-      setSocket(null);
-    });
+  }, [userId, secureLocalStorage?.address, secureLocalStorage?.vault]);
 
+  useEffect(() => {
     return () => {
-      newSocket.disconnect();
+      socket?.disconnect();
       setSocket(null);
     };
-  }, [userId, secureLocalStorage?.address, secureLocalStorage?.vault]);
+  }, [])
 
   return (
     <SocketContext.Provider value={{ socket }}>

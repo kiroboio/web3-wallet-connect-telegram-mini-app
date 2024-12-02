@@ -8,9 +8,11 @@ import { Socket } from "socket.io-client";
 import {
   ExternalVariables,
   getTriggers,
+  TriggerSubscriptionParams,
   TriggerType,
 } from "../triggers/triggers";
 import { getSwapQuote } from "../triggers/logic/uniswapv2GetAmountOut";
+import { SCHEMA } from "../utils/secureStorage";
 
 const subscriptions: Map<
   string,
@@ -199,19 +201,22 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
         intentId,
         externalVariables,
         type,
-      }: {
-        triggerId: string;
-        intentId: string;
-        externalVariables: ExternalVariables;
-        type: TriggerType;
-      }) => {
-        console.log({ triggerId, intentId, externalVariables });
+      }: TriggerSubscriptionParams) => {
+        console.log({ triggerId, intentId, externalVariables, activeTrigger: true });
         if (type !== "STRATAGY") return;
         if (!secureLocalStorage?.address) {
           alert("No wallet found!");
           return;
         }
 
+        secureLocalStorage?.storeTriggerData(SCHEMA.TRIGGER, {
+          value: {
+            triggerId,
+            intentId,
+            externalVariables,
+            type,
+          }
+        })
         addSubscription({
           triggerId,
           intentId,
@@ -226,6 +231,7 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
 
     socket.on("removeTrigger", async ({ triggerId, intentId }) => {
       console.log({ remove: true, triggerId, intentId });
+      secureLocalStorage?.clearTriggerData(SCHEMA.TRIGGER, { triggerId, intentId })
       if (!secureLocalStorage?.address) {
         alert("No wallet found!");
         return;
@@ -242,6 +248,7 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
       socket.off("activateTrigger");
       socket.off("removeTrigger");
     };
+
   }, [socket, userId, secureLocalStorage]);
 
   return null; // This component doesn't render anything

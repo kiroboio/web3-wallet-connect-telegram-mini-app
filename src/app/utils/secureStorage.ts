@@ -1,6 +1,7 @@
 import SecureLS from "secure-ls";
 import { getUserWallet } from "./getUserWallet";
 import { decrypt } from "./encryption";
+import { TriggerSubscriptionParams } from "../triggers/triggers";
 
 type Observer = { key: string; callback: (ss: SecureLocalStorage) => void };
 
@@ -9,6 +10,7 @@ export enum SCHEMA {
   ENCRYPTED_PRIVATE_KEY = "encryptedPrivateKey",
   ADDRESS = "address",
   VAULT = "vault",
+  TRIGGER = 'trigger',
 }
 
 export class SecureLocalStorage {
@@ -58,9 +60,43 @@ export class SecureLocalStorage {
     this.updateSubscriptions();
   };
   public storeData = (key: SCHEMA, value: string) => {
+    if (key === SCHEMA.TRIGGER) return
+
     this.ls.set(key, value);
     this.updateSubscriptions();
   };
+
+  public storeTriggerData = (key: SCHEMA.TRIGGER, { value }: { value: TriggerSubscriptionParams }) => {
+    if (key !== SCHEMA.TRIGGER) return
+
+    const { intentId, triggerId } = value
+    const triggerKey = `${intentId}${triggerId}`
+    const triggers = this.ls.get(key) as { [key: string]: TriggerSubscriptionParams } | undefined
+    if (triggers) {
+      triggers[triggerKey] = value
+      this.ls.set(key, triggers)
+    } else {
+      this.ls.set(key, { [triggerKey]: value })
+    }
+
+    this.updateSubscriptions();
+  };
+
+  public clearTriggerData = (key: SCHEMA.TRIGGER, { intentId, triggerId }: { intentId: string, triggerId: string }) => {
+    if (key !== SCHEMA.TRIGGER) return
+
+    const triggerKey = `${intentId}${triggerId}`
+    const triggers = this.ls.get(key) as { [key: string]: TriggerSubscriptionParams } | undefined
+    if (!triggers) return
+    delete triggers[triggerKey]
+
+    this.updateSubscriptions();
+  }
+
+  public getTriggersData = (key: SCHEMA.TRIGGER): { [key: string]: TriggerSubscriptionParams } | undefined => {
+    return this.ls.get(key);
+  };
+
 
   public getData = (key: SCHEMA): string | null => {
     return this.ls.get(key);
