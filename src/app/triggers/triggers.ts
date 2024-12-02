@@ -9,7 +9,7 @@ export type ExternalVariables =
     label: string;
     type?: UIType;
     fctType?: string;
-    value?: any;
+    value?: unknown;
     index?: number;
     decimals?: number
   })[]
