@@ -6,7 +6,7 @@ export const getUserWallet = (phrase: string) => {
    * If the phrase does not contain spaces, it is likely a private key
    */
   const wallet = phrase.includes(' ')
-    ? Wallet.fromPhrase(phrase)
+    ? Wallet.fromMnemonic(phrase)
     : new Wallet(phrase);
 
   return { wallet };

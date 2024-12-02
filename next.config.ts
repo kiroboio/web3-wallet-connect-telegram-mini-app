@@ -8,8 +8,16 @@ const nextConfig: NextConfig = {
         destination: '/',
         permanent: true,
       },
-    ]
+    ];
+  },
+  webpack: (config) => {
+    // Add the fallback configuration
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+    };
+    return config;
   },
 };
 
-export default nextConfig;
+export default nextConfig

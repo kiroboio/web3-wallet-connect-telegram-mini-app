@@ -1,62 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSocket } from "../context/SocketProvider";
-import { ethers, getBytes, isBytesLike, zeroPadValue } from "ethers";
+import { utils } from "ethers";
 import { useSecureStorage } from "../context/SecureStorageProvider";
-import { provider } from "../provider/provider";
+import { getProvider } from "../triggers/provider/provider";
 import { EventType, JsonRpcProvider } from "@ethersproject/providers";
-
-const getTriggers = ({
-  address,
-  provider,
-}: {
-  address: string;
-  provider: JsonRpcProvider;
-}) => ({
-  "0x1": {
-    method: "transfer",
-    abi: [`function transfer(address to, uint256 value)`],
-    filter: {
-      topics: [
-        ethers.id("Transfer(address,address,uint256)"),
-        null,
-        zeroPadValue(address, 32),
-      ],
-    },
-
-    proccessLog: async function (log: any) {
-      console.log({ log });
-      const trx = await provider.getTransaction(log.transactionHash);
-      console.log({ trx });
-      if (!trx) return;
-
-      const iface = new ethers.Interface(this.abi);
-
-      const decodedData = iface.decodeFunctionData(this.method, trx.data);
-
-      const receiver = decodedData.to;
-      const amount = decodedData.value;
-
-      const tokenAddress = log.address;
-
-      console.log({ tokenAddress, decodedData, receiver, amount });
-
-      if (
-        !tokenAddress ||
-        !amount ||
-        receiver?.toLowerCase() !== address?.toLowerCase()
-      ) {
-        console.warn(`wrong transaction`);
-        return;
-      }
-      return [tokenAddress, amount];
-    },
-  },
-});
-
+import { Socket } from "socket.io-client";
+import {
+  ExternalVariables,
+  getTriggers,
+  TriggerType,
+} from "../triggers/triggers";
+import { getSwapQuote } from "../triggers/logic/uniswapv2GetAmountOut";
 
 const subscriptions: Map<
   string,
-  { filter: EventType; listener: (l: any) => Promise<unknown[] | undefined> }
+  { filter: EventType; listener: (l: any) => Promise<void> }
 > = new Map();
 
 const getSubscriptionKey = ({
@@ -66,7 +24,6 @@ const getSubscriptionKey = ({
   triggerId: EventType;
   intentId: string;
 }) => `${triggerId}_${intentId}`;
-
 
 function clearSubscription({
   triggerId,
@@ -88,24 +45,34 @@ function clearSubscription({
   console.log({ removePrevSubscriptio: prevSubscription });
 }
 
-
 function addSubscription({
   triggerId,
   intentId,
   address,
   provider,
+  socket,
+  userId,
+  externalVariables,
 }: {
   triggerId: string;
   intentId: string;
   address: string;
   provider: JsonRpcProvider;
+  socket: Socket | null;
+  userId: string;
+  externalVariables: ExternalVariables;
 }) {
   const key = getSubscriptionKey({ triggerId, intentId });
-  clearSubscription({ triggerId, intentId, provider })
+  clearSubscription({ triggerId, intentId, provider });
 
-  const trigger = getTriggers({ address, provider })[
-    triggerId as keyof ReturnType<typeof getTriggers>
-  ];
+  const trigger = getTriggers({
+    address,
+    provider,
+    intentId,
+    socket,
+    userId,
+    externalVariables,
+  })[triggerId as keyof ReturnType<typeof getTriggers>];
   const listener = async (log: any) => {
     console.log(
       `Event received for triggerId: ${triggerId}, intentId: ${intentId}`
@@ -119,39 +86,127 @@ function addSubscription({
   subscriptions.set(key, { filter: trigger.filter, listener });
 }
 
-const sepoliaProvider = provider["11155111"];
+const sepoliaProvider = getProvider("11155111");
 
 export const WalletSign = ({ userId }: { userId?: string | null }) => {
   const { socket } = useSocket();
   const secureLocalStorage = useSecureStorage();
+
   useEffect(() => {
     if (!socket) return;
     if (!userId) return;
 
     // Listen for sign requests
-    socket.on("signRequest", async ({ message, encodedValues, intentId }) => {
-      if (!secureLocalStorage?.address) {
-        alert("No wallet found!");
-        return;
-      }
-
-      const signature = await secureLocalStorage.signMessage(
-        isBytesLike(message) ? getBytes(message) : message
-      );
-
-      socket.emit("signedMessage", {
-        userId: Number(userId),
-        signature,
+    socket.on(
+      "signRequest",
+      async ({
+        message,
         encodedValues,
         intentId,
-      });
-      console.log({ signature, encodedValues, intentId, message });
-    });
+        type,
+        externalVariables,
+      }: {
+        message: string;
+        encodedValues: string[];
+        intentId: string;
+        type: TriggerType;
+        externalVariables: ExternalVariables;
+      }) => {
+        if (!secureLocalStorage?.address) {
+          alert("No wallet found!");
+          return;
+        }
+
+        const emitSignatureMessage = async () => {
+          const signature = await secureLocalStorage.signMessage(
+            utils.isBytesLike(message) ? utils.arrayify(message) : message
+          );
+
+          socket.emit("signedMessage", {
+            userId: Number(userId),
+            signature,
+            encodedValues,
+            intentId,
+          });
+          console.log({ signature, encodedValues, intentId, message });
+        };
+
+        console.log({ externalVariables, type });
+        switch (type) {
+          case "TRANSACTION_EXECUTE_ONLY":
+            emitSignatureMessage();
+            break;
+
+          case "STRATAGY":
+            emitSignatureMessage();
+            break;
+
+          case "SWAP_PROTECT":
+            const tokens = externalVariables
+              ?.filter((variable) => variable.type === "token")
+              .sort(
+                (token1, token2) => (token1.index || 0) - (token2.index || 0)
+              );
+
+            const amount = externalVariables?.find(
+              (variable) =>
+                variable.type === "integer" || variable.type === "number"
+            )?.value;
+
+            console.log({ tokens, amount });
+            if (!amount) return;
+            if (!tokens) return;
+
+            const token1 = tokens[0];
+            const token2 = tokens[1];
+
+            console.log({ token1, token2 });
+            if (!token1.decimals) return;
+            if (!token2.decimals) return;
+
+            const amountOut = await getSwapQuote?.({
+              chainId: "11155111",
+              fromToken: token1.value,
+              fromDecimals: token1.decimals,
+              toToken: token2.value,
+              toDecimals: token2.decimals,
+              recipient: secureLocalStorage?.address,
+              amount: amount,
+            });
+
+            externalVariables?.find((variable) => {
+              if (!(variable.handle === "methodParams.amountOutMin")) return;
+
+              variable.value = amountOut;
+            });
+
+            socket?.emit("triggerProtectedSwap", {
+              userId: Number(userId),
+              triggerId: "protectedSwap",
+              intentId,
+              externalVariables,
+            });
+
+            break;
+        }
+      }
+    );
 
     socket.on(
       "activateTrigger",
-      async ({ triggerId, intentId, encodedValues }) => {
-        console.log({ triggerId, intentId, encodedValues });
+      async ({
+        triggerId,
+        intentId,
+        externalVariables,
+        type,
+      }: {
+        triggerId: string;
+        intentId: string;
+        externalVariables: ExternalVariables;
+        type: TriggerType;
+      }) => {
+        console.log({ triggerId, intentId, externalVariables });
+        if (type !== "STRATAGY") return;
         if (!secureLocalStorage?.address) {
           alert("No wallet found!");
           return;
@@ -162,33 +217,32 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
           intentId,
           address: secureLocalStorage.address,
           provider: sepoliaProvider,
+          socket,
+          userId,
+          externalVariables,
         });
       }
     );
 
-    socket.on(
-      "removeTrigger",
-      async ({ triggerId, intentId }) => {
-        console.log({ remove: true, triggerId, intentId });
-        if (!secureLocalStorage?.address) {
-          alert("No wallet found!");
-          return;
-        }
-
-        clearSubscription({
-          triggerId,
-          intentId,
-          provider: sepoliaProvider,
-        });
+    socket.on("removeTrigger", async ({ triggerId, intentId }) => {
+      console.log({ remove: true, triggerId, intentId });
+      if (!secureLocalStorage?.address) {
+        alert("No wallet found!");
+        return;
       }
-    );
+
+      clearSubscription({
+        triggerId,
+        intentId,
+        provider: sepoliaProvider,
+      });
+    });
     return () => {
       socket.off("signRequest");
       socket.off("activateTrigger");
       socket.off("removeTrigger");
     };
   }, [socket, userId, secureLocalStorage]);
-
 
   return null; // This component doesn't render anything
 };

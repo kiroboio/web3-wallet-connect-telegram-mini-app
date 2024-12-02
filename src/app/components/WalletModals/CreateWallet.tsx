@@ -19,6 +19,7 @@ export const CreateWalletModal: React.FC<CreateWalletModalProps> = ({
 }) => {
   const secureLocalStorage = useSecureStorage()
   const [password, setPassword] = useState("");
+  const [vault, setVault] = useState("");
   const storeData = secureLocalStorage?.storeData;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -28,7 +29,8 @@ export const CreateWalletModal: React.FC<CreateWalletModalProps> = ({
       const { wallet } = createNewUserWallet();
 
       storeData(SCHEMA.PASSWORD, password);
-      storeData(SCHEMA.ENCRYPTED_PRIVATE_KEY, encrypt(wallet.privateKey, password)); // Placeholder for encrypted private key
+      storeData(SCHEMA.ENCRYPTED_PRIVATE_KEY, encrypt(wallet.privateKey, password));
+      storeData(SCHEMA.VAULT, vault)
     } catch (e) {
 
       const error = e as { message: string } | undefined
@@ -72,6 +74,18 @@ export const CreateWalletModal: React.FC<CreateWalletModalProps> = ({
               in your local storage. We will not store your password or private
               key. If you lose your private key, it will be lost forever.
             </span>
+          </div>
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700">
+              Your Runner Address
+            </label>
+            <input
+              type="text"
+              required
+              value={vault}
+              onChange={(e) => setVault(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+            />
           </div>
           <button
             type="submit"
