@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSocket } from "../context/SocketProvider";
 import { utils } from "ethers";
 import { useSecureStorage } from "../context/SecureStorageProvider";
@@ -14,7 +14,7 @@ import { getSwapQuote } from "../triggers/logic/uniswapv2GetAmountOut";
 
 const subscriptions: Map<
   string,
-  { filter: EventType; listener: (l: any) => Promise<void> }
+  { filter: EventType; listener: (l: unknown) => Promise<void> }
 > = new Map();
 
 const getSubscriptionKey = ({
@@ -73,7 +73,7 @@ function addSubscription({
     userId,
     externalVariables,
   })[triggerId as keyof ReturnType<typeof getTriggers>];
-  const listener = async (log: any) => {
+  const listener = async (log: unknown) => {
     console.log(
       `Event received for triggerId: ${triggerId}, intentId: ${intentId}`
     );

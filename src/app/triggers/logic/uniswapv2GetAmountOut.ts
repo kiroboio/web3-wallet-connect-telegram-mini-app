@@ -4,7 +4,7 @@ import { UniswapHelper } from "@kiroboio/fct-plugins";
 import { WETH9 } from "@uniswap/sdk-core";
 import { getCreate2Address } from "ethers/lib/utils";
 import { keccak256, pack } from "@ethersproject/solidity";
-import { FACTORY_ADDRESS_MAP, INIT_CODE_HASH } from "@uniswap/v2-sdk";
+import { INIT_CODE_HASH } from "@uniswap/v2-sdk";
 
 export const ROUTER_V2_ADDRESS: Record<ChainId, string> = {
   "1": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
@@ -21,22 +21,12 @@ export const FACTORY_V2_ADDRESSES: Record<ChainId, string> = {
   "11155111": "0xF62c03E08ada871A0bEb309762E260a7a6a880E6",
 };
 
-const uniswapV2FactoryABI = [
-  "function getPair(address tokenA, address tokenB) external view returns (address pair)",
-];
 
-const uniswapV2PairABI = [
-  "function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
-  "function token0() external view returns (address)",
-  "function token1() external view returns (address)",
-];
 
 export const getSwapQuote = async ({
   chainId,
 
-  fromDecimals,
   toToken,
-  toDecimals,
   recipient,
   amount,
 }: {
@@ -80,7 +70,6 @@ export const getSwapQuote = async ({
   };
 
   const weth = WETH9[Number(chainId)].address;
-  const uniswapV2FactoryAddress = FACTORY_V2_ADDRESSES[chainId];
 
   const fromToken = weth;
 

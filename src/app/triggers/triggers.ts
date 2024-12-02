@@ -1,4 +1,4 @@
-import { ethers, utils } from "ethers";
+import { utils } from "ethers";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { Socket } from "socket.io-client";
 import type { ParamHanlde, UIType } from "@kiroboio/fct-builder";
@@ -6,13 +6,13 @@ import { Interface } from "ethers/lib/utils";
 
 export type ExternalVariables =
   | (ParamHanlde & {
-      label: string;
-      type?: UIType;
-      fctType?: string;
-      value?: any;
-      index?: number;
-      decimals?: number
-    })[]
+    label: string;
+    type?: UIType;
+    fctType?: string;
+    value?: any;
+    index?: number;
+    decimals?: number
+  })[]
   | undefined;
 
 export type TriggerType =
@@ -45,7 +45,8 @@ export const getTriggers = ({
       ],
     },
 
-    proccessLog: async function (log: any) {
+    proccessLog: async function (l: unknown) {
+      const log = l as { address: string, transactionHash: string }
       console.log({ log });
       const trx = await provider.getTransaction(log.transactionHash);
       console.log({ trx });

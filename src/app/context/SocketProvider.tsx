@@ -50,7 +50,7 @@ export const SocketProvider: React.FC<{
       newSocket.disconnect();
       setSocket(null);
     };
-  }, [userId, secureLocalStorage?.address]);
+  }, [userId, secureLocalStorage?.address, secureLocalStorage?.vault]);
 
   return (
     <SocketContext.Provider value={{ socket }}>
