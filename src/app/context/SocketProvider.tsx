@@ -53,8 +53,10 @@ export const SocketProvider: React.FC<{
 
   useEffect(() => {
     return () => {
-      socket?.disconnect();
-      setSocket(null);
+      // @ts-expect-error: Telegram
+      window?.Telegram?.WebApp?.expand()
+      //socket?.disconnect();
+      //setSocket(null);
     };
   }, [])
 
