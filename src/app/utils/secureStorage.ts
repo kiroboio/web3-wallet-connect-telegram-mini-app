@@ -93,6 +93,16 @@ export class SecureLocalStorage {
     this.updateSubscriptions();
   }
 
+  public clearAllTriggers = (key: SCHEMA.TRIGGER) => {
+    if (key !== SCHEMA.TRIGGER) return
+
+
+    this.ls.remove(key)
+
+    this.updateSubscriptions();
+  }
+
+
   public getTriggersData = (key: SCHEMA.TRIGGER): { [key: string]: TriggerSubscriptionParams } | undefined => {
     return this.ls.get(key);
   };

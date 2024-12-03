@@ -33,32 +33,38 @@ export const SocketProvider: React.FC<{
 
     newSocket.on("connect", () => {
       console.log("Connected to Socket.IO server");
-      // Emit 'init' event with userId
       newSocket.emit("init", {
         userId,
         wallet: secureLocalStorage?.address,
         vault: secureLocalStorage?.vault,
       });
-
-      const triggers = secureLocalStorage?.getTriggersData(SCHEMA.TRIGGER)
-      if (!triggers) return
-
-      Object.keys(triggers).forEach((key) => {
-        const trigger = triggers[key]
-        newSocket.emit("reconnectTrigger", trigger)
-      })
     });
 
+    newSocket.on("restoreTriggers", (isUserWasConnected) => {
+      if (!isUserWasConnected) {
+        secureLocalStorage.clearAllTriggers(SCHEMA.TRIGGER);
+        return;
+      }
+
+      const triggers = secureLocalStorage?.getTriggersData(SCHEMA.TRIGGER);
+      if (!triggers) return;
+
+      Object.keys(triggers).forEach((key) => {
+        const trigger = triggers[key];
+        console.log({ reconnectTrigger: trigger });
+        newSocket.emit("reconnectTrigger", { data: trigger, userId });
+      });
+    });
   }, [userId, secureLocalStorage?.address, secureLocalStorage?.vault]);
 
   useEffect(() => {
     return () => {
       // @ts-expect-error: Telegram
-      window?.Telegram?.WebApp?.expand()
+      window?.Telegram?.WebApp?.expand();
       //socket?.disconnect();
       //setSocket(null);
     };
-  }, [])
+  }, []);
 
   return (
     <SocketContext.Provider value={{ socket }}>
