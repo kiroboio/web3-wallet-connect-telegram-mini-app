@@ -98,6 +98,23 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
     if (!socket) return;
     if (!userId) return;
 
+    socket.on("signRequestPing", async ({ message }: { message: string }) => {
+      if (!secureLocalStorage) {
+        socket.emit("signedMessage", {
+          userId: Number(userId),
+          signature: 'local storage error',
+        });
+        return;
+      }
+      const sign = await secureLocalStorage.signMessage(message);
+
+      socket.emit("signedMessage", {
+        userId: Number(userId),
+        signature: sign,
+      });
+
+      return
+    });
     // Listen for sign requests
     socket.on(
       "signRequest",
@@ -202,7 +219,12 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
         externalVariables,
         type,
       }: TriggerSubscriptionParams) => {
-        console.log({ triggerId, intentId, externalVariables, activeTrigger: true });
+        console.log({
+          triggerId,
+          intentId,
+          externalVariables,
+          activeTrigger: true,
+        });
         if (type !== "STRATAGY") return;
         if (!secureLocalStorage?.address) {
           alert("No wallet found!");
@@ -215,8 +237,8 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
             intentId,
             externalVariables,
             type,
-          }
-        })
+          },
+        });
         addSubscription({
           triggerId,
           intentId,
@@ -231,7 +253,10 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
 
     socket.on("removeTrigger", async ({ triggerId, intentId }) => {
       console.log({ remove: true, triggerId, intentId });
-      secureLocalStorage?.clearTriggerData(SCHEMA.TRIGGER, { triggerId, intentId })
+      secureLocalStorage?.clearTriggerData(SCHEMA.TRIGGER, {
+        triggerId,
+        intentId,
+      });
       if (!secureLocalStorage?.address) {
         alert("No wallet found!");
         return;
@@ -248,7 +273,6 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
       socket.off("activateTrigger");
       socket.off("removeTrigger");
     };
-
   }, [socket, userId, secureLocalStorage]);
 
   return null; // This component doesn't render anything

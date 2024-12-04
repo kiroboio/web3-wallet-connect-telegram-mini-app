@@ -26,6 +26,9 @@ export const SocketProvider: React.FC<{
       process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:4000",
       {
         transports: ["websocket"],
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
       }
     );
 
