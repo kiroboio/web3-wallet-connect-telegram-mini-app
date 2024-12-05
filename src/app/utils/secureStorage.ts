@@ -42,6 +42,19 @@ export class SecureLocalStorage {
     return wallet.address;
   }
 
+  public get privateKey() {
+    const password = this.getData(SCHEMA.PASSWORD);
+    const privateKey = this.getData(SCHEMA.ENCRYPTED_PRIVATE_KEY);
+
+    if (privateKey && password) return  decrypt(privateKey, password);
+
+    const wallet = this.userWallet;
+    if (!wallet) return;
+
+    return wallet.privateKey;
+  }
+
+
   public get vault() {
     const vault = this.getData(SCHEMA.VAULT);
 

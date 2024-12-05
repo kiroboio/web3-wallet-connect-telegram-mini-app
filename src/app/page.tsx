@@ -23,6 +23,8 @@ export default function Home() {
   const [walletAddress, setWalletAddress] = useState(
     secureLocalStorage?.address
   );
+
+  
   const searchParams = useSearchParams();
 
   const userId = searchParams.get("userId");
@@ -85,7 +87,7 @@ export default function Home() {
 
     if (!walletAddress) return "Not Connected"
 
-    return <WalletAddress address={walletAddress} />
+    return <WalletAddress address={walletAddress} privateKey={secureLocalStorage.privateKey}/>
   }
   return (
     <SocketProvider userId={Number(userId)}>

@@ -25,10 +25,13 @@ export const SocketProvider: React.FC<{
     const newSocket = io(
       process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:4000",
       {
-        transports: ["websocket"],
         reconnection: true,
         reconnectionAttempts: Infinity,
         reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 20000,
+        transports: ['websocket'],
+        upgrade: false,
       }
     );
 
@@ -41,6 +44,12 @@ export const SocketProvider: React.FC<{
         wallet: secureLocalStorage?.address,
         vault: secureLocalStorage?.vault,
       });
+    });
+
+    newSocket.on('disconnect', (reason) => {
+      console.warn('Socket disconnected:', reason);
+      // Reconnection is handled automatically by Socket.IO
+      //newSocket.emit('disconne')
     });
 
     newSocket.on("restoreTriggers", (isUserWasConnected) => {
@@ -58,6 +67,15 @@ export const SocketProvider: React.FC<{
         newSocket.emit("reconnectTrigger", { data: trigger, userId });
       });
     });
+
+    const pingInterfal = setInterval(() => {
+      newSocket.emit('ping');
+    }, 25000);
+
+    return () => {
+      clearInterval(pingInterfal)
+      newSocket.removeAllListeners()
+    }
   }, [userId, secureLocalStorage?.address, secureLocalStorage?.vault]);
 
   useEffect(() => {
