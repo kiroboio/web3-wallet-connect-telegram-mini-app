@@ -1,4 +1,4 @@
-import { TriggerSubscriptionParams } from "@/app/triggers/triggers";
+import { TriggerSubscriptionParams } from "@/app/events/getEvents";
 import { useMemo, useState } from "react";
 
 export const TriggerCard = ({ trigger }: { trigger: TriggerSubscriptionParams}) => {

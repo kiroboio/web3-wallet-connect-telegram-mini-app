@@ -1,17 +1,15 @@
 import { useEffect } from "react";
 import { useSocket } from "../context/SocketProvider";
-import { utils } from "ethers";
 import { useSecureStorage } from "../context/SecureStorageProvider";
-import { getProvider } from "../triggers/provider/provider";
+import { getProvider } from "../events/provider/provider";
 import { EventType, JsonRpcProvider } from "@ethersproject/providers";
 import { Socket } from "socket.io-client";
 import {
   ExternalVariables,
-  getTriggers,
+  getEvents,
   TriggerSubscriptionParams,
   TriggerType,
-} from "../triggers/triggers";
-import { getSwapQuote } from "../triggers/logic/uniswapv2GetAmountOut";
+} from "../events/getEvents";
 import { SCHEMA, SecureLocalStorage } from "../utils/secureStorage";
 
 const subscriptions: Map<
@@ -47,7 +45,7 @@ function clearSubscription({
   console.log({ removePrevSubscriptio: prevSubscription });
 }
 
-type TriggerKey = keyof ReturnType<typeof getTriggers>;
+type EventKey = keyof ReturnType<typeof getEvents>;
 function addSubscription({
   triggerId,
   intentId,
@@ -58,7 +56,7 @@ function addSubscription({
   externalVariables,
   secureLocalStorage,
 }: {
-  triggerId: TriggerKey;
+  triggerId: EventKey;
   intentId: string;
   address: string;
   provider: JsonRpcProvider;
@@ -70,7 +68,7 @@ function addSubscription({
   const key = getSubscriptionKey({ triggerId, intentId });
   clearSubscription({ triggerId, intentId, provider });
 
-  const trigger = getTriggers({
+  const trigger = getEvents({
     address,
     provider,
     intentId,
@@ -78,7 +76,7 @@ function addSubscription({
     userId,
     externalVariables,
     secureLocalStorage,
-  })[triggerId as keyof ReturnType<typeof getTriggers>];
+  })[triggerId as keyof ReturnType<typeof getEvents>];
 
   switch (trigger.type) {
     case "swap":
@@ -149,7 +147,7 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
           return;
         }
 
-        getTriggers({
+        getEvents({
           address: secureLocalStorage.address,
           provider: sepoliaProvider,
           intentId,
@@ -158,22 +156,7 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
           externalVariables,
           secureLocalStorage,
         })['signMessage'].handleEvent({ message, encodedValues, intentId, type, externalVariables})
-        // const emitSignatureMessage = async () => {
-        //   const signature = await secureLocalStorage.signMessage(
-        //     utils.isBytesLike(message) ? utils.arrayify(message) : message
-        //   );
 
-        //   socket.emit("signedMessage", {
-        //     userId: Number(userId),
-        //     signature,
-        //     encodedValues,
-        //     intentId,
-        //   });
-        //   console.log({ signature, encodedValues, intentId, message });
-        // };
-
-        // console.log({ externalVariables, type });
-        // emitSignatureMessage();
       }
     );
 
@@ -207,7 +190,7 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
           },
         });
         addSubscription({
-          triggerId: triggerId as TriggerKey,
+          triggerId: triggerId as EventKey,
           intentId,
           address: secureLocalStorage.address,
           provider: sepoliaProvider,

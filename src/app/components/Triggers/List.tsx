@@ -2,7 +2,7 @@ import { useSecureStorage } from "@/app/context/SecureStorageProvider";
 import { SCHEMA } from "@/app/utils/secureStorage";
 import { TriggerCard } from "./Card";
 import { useEffect, useState } from "react";
-import { TriggerSubscriptionParams } from "@/app/triggers/triggers";
+import { TriggerSubscriptionParams } from "@/app/events/getEvents";
 
 export const TriggersList = () => {
   const secureStorage = useSecureStorage();

@@ -3,7 +3,7 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { Socket } from "socket.io-client";
 import type { ParamHanlde, UIType } from "@kiroboio/fct-builder";
 import { Interface } from "ethers/lib/utils";
-import { getSwapQuote } from "../triggers/logic/uniswapv2GetAmountOut";
+import { getSwapQuote } from "./swap/uniswapv2GetAmountOut";
 import { SCHEMA, SecureLocalStorage } from "../utils/secureStorage";
 
 export type ExternalVariables =
@@ -33,7 +33,7 @@ export type TriggerType =
   | "TRANSACTION_EXECUTE_ONLY"
   | "STRATAGY"
   | "SWAP_PROTECT";
-export const getTriggers = ({
+export const getEvents = ({
   address,
   provider,
   socket,

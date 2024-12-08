@@ -1,7 +1,7 @@
 import SecureLS from "secure-ls";
 import { getUserWallet } from "./getUserWallet";
 import { decrypt } from "./encryption";
-import { TriggerSubscriptionParams } from "../triggers/triggers";
+import { TriggerSubscriptionParams } from "../events/getEvents";
 
 type Observer = { key: string; callback: (ss: SecureLocalStorage) => void };
 
