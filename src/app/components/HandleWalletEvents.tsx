@@ -101,7 +101,7 @@ function addSubscription({
 
 const sepoliaProvider = getProvider("11155111");
 
-export const WalletSign = ({ userId }: { userId?: string | null }) => {
+export const HandleWalletEvents = ({ userId }: { userId?: string | null }) => {
   const { socket } = useSocket();
   const secureLocalStorage = useSecureStorage();
 

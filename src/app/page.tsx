@@ -10,7 +10,7 @@ import { CreateWalletModal } from "./components/WalletModals/CreateWallet";
 import WalletAddress from "./components/WaletAddress";
 import { SocketProvider } from "./context/SocketProvider";
 import { useSearchParams } from "next/navigation";
-import { WalletSign } from "./components/WalletSign";
+import { HandleWalletEvents } from "./components/HandleWalletEvents";
 import { useSecureStorage } from "./context/SecureStorageProvider";
 import { Spinner } from "./components/Spinner";
 import { TriggersList } from "./components/Triggers/List";
@@ -122,7 +122,7 @@ export default function Home() {
         />
         <TriggersList />
       </main>
-      <WalletSign userId={userId} />
+      <HandleWalletEvents userId={userId} />
     </SocketProvider>
   );
 }
