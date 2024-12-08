@@ -13,25 +13,24 @@ import { useSearchParams } from "next/navigation";
 import { WalletSign } from "./components/WalletSign";
 import { useSecureStorage } from "./context/SecureStorageProvider";
 import { Spinner } from "./components/Spinner";
-
+import { TriggersList } from "./components/Triggers/List";
 
 export default function Home() {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  const secureLocalStorage = useSecureStorage()
+  const secureLocalStorage = useSecureStorage();
   const [walletAddress, setWalletAddress] = useState(
     secureLocalStorage?.address
   );
 
-  
   const searchParams = useSearchParams();
 
   const userId = searchParams.get("userId");
 
   // console.log({ address: secureLocalStorage?.address })
   useEffect(() => {
-    setWalletAddress(secureLocalStorage?.address)
+    setWalletAddress(secureLocalStorage?.address);
     secureLocalStorage?.subscribe({
       key: "wallet_address",
       callback: (secureStorage) => {
@@ -41,7 +40,7 @@ export default function Home() {
   }, [secureLocalStorage]);
 
   const renderWalletButtons = () => {
-    if (!secureLocalStorage) return <Spinner size={24} />
+    if (!secureLocalStorage) return <Spinner size={24} />;
     if (!walletAddress) {
       return (
         <div className="flex flex-col justify-end items-end pt-4 pb-4 px-2">
@@ -64,16 +63,18 @@ export default function Home() {
     return (
       <div className="flex flex-col justify-end items-end pt-4 pb-4 px-2">
         <div className="py-2">
-          {secureLocalStorage ? <WalletButton
-            label="lock"
-            onClick={secureLocalStorage.lock}
-            icon={
-              <FaLock
-                className="text-2xl text-gray-700 fill-white mr-4"
-                size={16}
-              />
-            }
-          /> : null}
+          {secureLocalStorage ? (
+            <WalletButton
+              label="lock"
+              onClick={secureLocalStorage.lock}
+              icon={
+                <FaLock
+                  className="text-2xl text-gray-700 fill-white mr-4"
+                  size={16}
+                />
+              }
+            />
+          ) : null}
         </div>
       </div>
     );
@@ -81,17 +82,21 @@ export default function Home() {
 
   const getWalletInfo = () => {
     if (!secureLocalStorage) {
-
-      return <Spinner size={24} />
+      return <Spinner size={24} />;
     }
 
-    if (!walletAddress) return "Not Connected"
+    if (!walletAddress) return "Not Connected";
 
-    return <WalletAddress address={walletAddress} privateKey={secureLocalStorage.privateKey}/>
-  }
+    return (
+      <WalletAddress
+        address={walletAddress}
+        privateKey={secureLocalStorage.privateKey}
+      />
+    );
+  };
   return (
     <SocketProvider userId={Number(userId)}>
-      <main className="min-h-screen py-0 pb-12 flex-1 flex flex-col items-center bg-white">
+      <main className="min-h-screen py-0 pb-12 flex flex-col items-center bg-white">
         <header className="w-full py-4 flex justify-center items-center">
           <div className="flex w-full rounded justify-between items-center overflow-hidden shadow-lg bg-white px-4">
             <IconWithText
@@ -101,9 +106,7 @@ export default function Home() {
                   className={walletAddress ? `fill-blue-500` : `fill-gray-400`}
                 />
               }
-              text={
-                getWalletInfo()
-              }
+              text={getWalletInfo()}
               hasData={Boolean(walletAddress)}
             />
             {renderWalletButtons()}
@@ -117,6 +120,7 @@ export default function Home() {
           isOpen={isCreateOpen}
           onClose={() => setIsCreateOpen(false)}
         />
+        <TriggersList />
       </main>
       <WalletSign userId={userId} />
     </SocketProvider>

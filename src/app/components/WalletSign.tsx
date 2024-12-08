@@ -12,7 +12,7 @@ import {
   TriggerType,
 } from "../triggers/triggers";
 import { getSwapQuote } from "../triggers/logic/uniswapv2GetAmountOut";
-import { SCHEMA } from "../utils/secureStorage";
+import { SCHEMA, SecureLocalStorage } from "../utils/secureStorage";
 
 const subscriptions: Map<
   string,
@@ -55,6 +55,7 @@ function addSubscription({
   socket,
   userId,
   externalVariables,
+  secureLocalStorage,
 }: {
   triggerId: string;
   intentId: string;
@@ -63,6 +64,7 @@ function addSubscription({
   socket: Socket | null;
   userId: string;
   externalVariables: ExternalVariables;
+  secureLocalStorage: SecureLocalStorage
 }) {
   const key = getSubscriptionKey({ triggerId, intentId });
   clearSubscription({ triggerId, intentId, provider });
@@ -74,13 +76,20 @@ function addSubscription({
     socket,
     userId,
     externalVariables,
+    secureLocalStorage,
   })[triggerId as keyof ReturnType<typeof getTriggers>];
+  if(!trigger.filter) {
+
+    trigger.handleTrigger();
+
+    return 
+  }
   const listener = async (log: unknown) => {
     console.log(
       `Event received for triggerId: ${triggerId}, intentId: ${intentId}`
     );
 
-    const res = await trigger.proccessLog(log);
+    const res = await trigger.handleTrigger(log);
 
     return res;
   };
@@ -225,7 +234,7 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
           externalVariables,
           activeTrigger: true,
         });
-        if (type !== "STRATAGY") return;
+        // if (type !== "STRATAGY") return;
         if (!secureLocalStorage?.address) {
           alert("No wallet found!");
           return;
@@ -237,6 +246,7 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
             intentId,
             externalVariables,
             type,
+            executions: [],
           },
         });
         addSubscription({
@@ -247,6 +257,7 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
           socket,
           userId,
           externalVariables,
+          secureLocalStorage
         });
       }
     );

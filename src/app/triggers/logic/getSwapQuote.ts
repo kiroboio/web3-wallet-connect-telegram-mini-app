@@ -21,8 +21,8 @@ export const getSwapQuote = async ({
   fromDecimals: number;
   toToken: string;
   toDecimals: number;
-  recipient: string;
   amount: string;
+  recipient?: string;
 }): Promise<void> => {
   const chainIdNum = Number(chainId);
   const TOKEN_IN = new Token(
@@ -54,7 +54,7 @@ export const getSwapQuote = async ({
   try {
     // Define swap options
     const swapOptions: SwapOptions = {
-      recipient,
+      recipient: recipient || '',
       slippageTolerance: new Percent(50, 10_000), // 0.5% slippage tolerance
       deadline: Math.floor(Date.now() / 1000) + 1800, // 30 minutes from now
       type: SwapType.SWAP_ROUTER_02,

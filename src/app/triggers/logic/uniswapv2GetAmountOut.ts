@@ -32,7 +32,7 @@ export const getSwapQuote = async ({
   chainId: ChainId;
   fromDecimals: number;
   toDecimals: number;
-  recipient: string;
+  recipient?: string;
   amount: string;
   fromToken?: string;
   toToken?: string;
