@@ -30,7 +30,7 @@ export const SocketProvider: React.FC<{
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
         timeout: 20000,
-        transports: ['websocket'],
+        transports: ["websocket"],
         upgrade: false,
       }
     );
@@ -46,8 +46,8 @@ export const SocketProvider: React.FC<{
       });
     });
 
-    newSocket.on('disconnect', (reason) => {
-      console.warn('Socket disconnected:', reason);
+    newSocket.on("disconnect", (reason) => {
+      console.warn("Socket disconnected:", reason);
       // Reconnection is handled automatically by Socket.IO
       //newSocket.emit('disconne')
     });
@@ -69,23 +69,24 @@ export const SocketProvider: React.FC<{
     });
 
     const pingInterfal = setInterval(() => {
-      newSocket.emit('ping');
+      newSocket.emit("ping");
     }, 25000);
 
     return () => {
-      clearInterval(pingInterfal)
-      newSocket.removeAllListeners()
-    }
+      clearInterval(pingInterfal);
+      newSocket.removeAllListeners();
+    };
   }, [userId, secureLocalStorage?.address, secureLocalStorage?.vault]);
 
   useEffect(() => {
+    if (secureLocalStorage?.address) return;
+    socket?.disconnect();
     return () => {
-      // @ts-expect-error: Telegram
-      window?.Telegram?.WebApp?.expand();
-      //socket?.disconnect();
-      //setSocket(null);
+      if (secureLocalStorage?.address) return;
+
+      socket?.disconnect();
     };
-  }, []);
+  }, [secureLocalStorage?.address]);
 
   return (
     <SocketContext.Provider value={{ socket }}>
