@@ -50,7 +50,7 @@ export const getTriggers = ({
   externalVariables: ExternalVariables;
   secureLocalStorage: SecureLocalStorage;
 }) => ({
-  "0x2": {
+  "tokenTransfer": {
     type: 'subscribe' as const,
     method: "transfer",
     abi: [`function transfer(address to, uint256 value)`],
@@ -100,10 +100,10 @@ export const getTriggers = ({
         }
       });
 
-      secureLocalStorage.addTriggerExecution(SCHEMA.TRIGGER, { intentId, triggerId: '0x2', execution: { time: new Date(), values: externalVariables }})
+      secureLocalStorage.addTriggerExecution(SCHEMA.TRIGGER, { intentId, triggerId: 'tokenTransfer', execution: { time: new Date(), values: externalVariables }})
       socket?.emit("triggerValues", {
         userId: Number(userId),
-        triggerId: "0x2",
+        triggerId: 'tokenTransfer',
         intentId,
         externalVariables,
       });
