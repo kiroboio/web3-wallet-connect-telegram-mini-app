@@ -51,6 +51,7 @@ export const getTriggers = ({
   secureLocalStorage: SecureLocalStorage;
 }) => ({
   "0x2": {
+    type: 'subscribe' as const,
     method: "transfer",
     abi: [`function transfer(address to, uint256 value)`],
     filter: {
@@ -61,7 +62,7 @@ export const getTriggers = ({
       ],
     },
 
-    handleTrigger: async function (l: unknown) {
+    handleEvent: async function (l: unknown) {
       const log = l as { address: string; transactionHash: string };
       console.log({ log });
       const trx = await provider.getTransaction(log.transactionHash);
@@ -110,7 +111,8 @@ export const getTriggers = ({
   },
   protectedSwap: {
     filter: undefined,
-    handleTrigger: async function () {
+    type: 'swap' as const,
+    handleEvent: async function () {
       const tokens = externalVariables
         ?.filter((variable) => variable.type === "token")
         .sort((token1, token2) => (token1.index || 0) - (token2.index || 0));
@@ -155,4 +157,43 @@ export const getTriggers = ({
       });
     },
   },
+  signMessage: {
+    type: 'sign' as const,
+    filter: undefined,
+    handleEvent: async function ({
+      message,
+      encodedValues,
+      intentId,
+      type,
+      externalVariables,
+    }: {
+      message: string;
+      encodedValues: string[];
+      intentId: string;
+      type: TriggerType;
+      externalVariables: ExternalVariables;
+    }) {
+      if (!secureLocalStorage?.address) {
+        alert("No wallet found!");
+        return;
+      }
+
+      const emitSignatureMessage = async () => {
+        const signature = await secureLocalStorage.signMessage(
+          utils.isBytesLike(message) ? utils.arrayify(message) : message
+        );
+
+        socket?.emit("signedMessage", {
+          userId: Number(userId),
+          signature,
+          encodedValues,
+          intentId,
+        });
+        console.log({ signature, encodedValues, intentId, message });
+      };
+
+      console.log({ externalVariables, type });
+      emitSignatureMessage();
+    }
+  }
 });

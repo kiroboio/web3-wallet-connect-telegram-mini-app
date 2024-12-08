@@ -47,6 +47,7 @@ function clearSubscription({
   console.log({ removePrevSubscriptio: prevSubscription });
 }
 
+type TriggerKey = keyof ReturnType<typeof getTriggers>;
 function addSubscription({
   triggerId,
   intentId,
@@ -57,14 +58,14 @@ function addSubscription({
   externalVariables,
   secureLocalStorage,
 }: {
-  triggerId: string;
+  triggerId: TriggerKey;
   intentId: string;
   address: string;
   provider: JsonRpcProvider;
   socket: Socket | null;
   userId: string;
   externalVariables: ExternalVariables;
-  secureLocalStorage: SecureLocalStorage
+  secureLocalStorage: SecureLocalStorage;
 }) {
   const key = getSubscriptionKey({ triggerId, intentId });
   clearSubscription({ triggerId, intentId, provider });
@@ -78,23 +79,26 @@ function addSubscription({
     externalVariables,
     secureLocalStorage,
   })[triggerId as keyof ReturnType<typeof getTriggers>];
-  if(!trigger.filter) {
 
-    trigger.handleTrigger();
+  switch (trigger.type) {
+    case "swap":
+      trigger.handleEvent();
+      break;
 
-    return 
+    case "subscribe":
+      const listener = async (log: unknown) => {
+        console.log(
+          `Event received for triggerId: ${triggerId}, intentId: ${intentId}`
+        );
+
+        const res = await trigger.handleEvent(log);
+
+        return res;
+      };
+      provider.on(trigger.filter, listener);
+      subscriptions.set(key, { filter: trigger.filter, listener });
+      break;
   }
-  const listener = async (log: unknown) => {
-    console.log(
-      `Event received for triggerId: ${triggerId}, intentId: ${intentId}`
-    );
-
-    const res = await trigger.handleTrigger(log);
-
-    return res;
-  };
-  provider.on(trigger.filter, listener);
-  subscriptions.set(key, { filter: trigger.filter, listener });
 }
 
 const sepoliaProvider = getProvider("11155111");
@@ -111,7 +115,7 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
       if (!secureLocalStorage) {
         socket.emit("signedMessage", {
           userId: Number(userId),
-          signature: 'local storage error',
+          signature: "local storage error",
         });
         return;
       }
@@ -122,7 +126,7 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
         signature: sign,
       });
 
-      return
+      return;
     });
     // Listen for sign requests
     socket.on(
@@ -145,78 +149,31 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
           return;
         }
 
-        const emitSignatureMessage = async () => {
-          const signature = await secureLocalStorage.signMessage(
-            utils.isBytesLike(message) ? utils.arrayify(message) : message
-          );
+        getTriggers({
+          address: secureLocalStorage.address,
+          provider: sepoliaProvider,
+          intentId,
+          socket,
+          userId,
+          externalVariables,
+          secureLocalStorage,
+        })['signMessage'].handleEvent({ message, encodedValues, intentId, type, externalVariables})
+        // const emitSignatureMessage = async () => {
+        //   const signature = await secureLocalStorage.signMessage(
+        //     utils.isBytesLike(message) ? utils.arrayify(message) : message
+        //   );
 
-          socket.emit("signedMessage", {
-            userId: Number(userId),
-            signature,
-            encodedValues,
-            intentId,
-          });
-          console.log({ signature, encodedValues, intentId, message });
-        };
+        //   socket.emit("signedMessage", {
+        //     userId: Number(userId),
+        //     signature,
+        //     encodedValues,
+        //     intentId,
+        //   });
+        //   console.log({ signature, encodedValues, intentId, message });
+        // };
 
-        console.log({ externalVariables, type });
-        switch (type) {
-          case "TRANSACTION_EXECUTE_ONLY":
-            emitSignatureMessage();
-            break;
-
-          case "STRATAGY":
-            emitSignatureMessage();
-            break;
-
-          case "SWAP_PROTECT":
-            const tokens = externalVariables
-              ?.filter((variable) => variable.type === "token")
-              .sort(
-                (token1, token2) => (token1.index || 0) - (token2.index || 0)
-              );
-
-            const amount = externalVariables?.find(
-              (variable) =>
-                variable.type === "integer" || variable.type === "number"
-            )?.value;
-
-            console.log({ tokens, amount });
-            if (!amount) return;
-            if (!tokens) return;
-
-            const token1 = tokens[0];
-            const token2 = tokens[1];
-
-            console.log({ token1, token2 });
-            if (!token1.decimals) return;
-            if (!token2.decimals) return;
-
-            const amountOut = await getSwapQuote?.({
-              chainId: "11155111",
-              fromToken: token1.value,
-              fromDecimals: token1.decimals,
-              toToken: token2.value,
-              toDecimals: token2.decimals,
-              recipient: secureLocalStorage?.address,
-              amount: amount,
-            });
-
-            externalVariables?.find((variable) => {
-              if (!(variable.handle === "methodParams.amountOutMin")) return;
-
-              variable.value = amountOut;
-            });
-
-            socket?.emit("triggerProtectedSwap", {
-              userId: Number(userId),
-              triggerId: "protectedSwap",
-              intentId,
-              externalVariables,
-            });
-
-            break;
-        }
+        // console.log({ externalVariables, type });
+        // emitSignatureMessage();
       }
     );
 
@@ -250,14 +207,14 @@ export const WalletSign = ({ userId }: { userId?: string | null }) => {
           },
         });
         addSubscription({
-          triggerId,
+          triggerId: triggerId as TriggerKey,
           intentId,
           address: secureLocalStorage.address,
           provider: sepoliaProvider,
           socket,
           userId,
           externalVariables,
-          secureLocalStorage
+          secureLocalStorage,
         });
       }
     );
