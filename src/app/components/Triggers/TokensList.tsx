@@ -1,66 +1,76 @@
 import { getProvider } from "@/app/events/provider/provider";
 import { fetchInitialTokenData } from "@/app/utils/tokens";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Balance } from "./Balance";
 import { ShortenAddress } from "../ShortenAddress";
 
 interface TokenListProps {
   tokens: string[];
   userAddress?: string | null;
+  selectedTokenAddress?: string;
 }
 
 export const TokenList: React.FC<TokenListProps> = ({
   tokens,
   userAddress,
+  selectedTokenAddress,
 }) => {
   const [tokenData, setTokenData] = useState<{
-    [address: string]: { symbol: string; balance: string };
+    [address: string]: { symbol: string; balance: string; decimals: number };
   }>({});
 
   const provider = getProvider("11155111");
+  const tokenRefs = useRef<{ [key: string]: HTMLLIElement | null }>({});
 
   useEffect(() => {
     (async () => {
-      const updatedData: {
-        [address: string]: { symbol: string; balance: string };
-      } = {};
-      const tokensData = await fetchInitialTokenData(
-        tokens,
-        userAddress || "",
-        provider
-      );
+      if (!userAddress) return;
+      const tokensData = await fetchInitialTokenData(tokens, userAddress, provider);
+      const updatedData: { [address: string]: { symbol: string; balance: string, decimals: number } } = {};
       for (const token of tokens) {
         const data = tokensData[token];
-        const symbol = data.symbol;
-        const balance = data.balance;
-        updatedData[token] = { symbol, balance };
+        if (!data) continue;
+        updatedData[token] = { symbol: data.symbol, balance: data.balance, decimals: data.decimals };
       }
       setTokenData(updatedData);
     })();
-  }, [tokens]);
+  }, [tokens, userAddress, provider]);
+
+  // Scroll to the selected token when it changes
+  useEffect(() => {
+    if (selectedTokenAddress && tokenRefs.current[selectedTokenAddress]) {
+      tokenRefs.current[selectedTokenAddress]?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+  }, [selectedTokenAddress]);
 
   if (!userAddress) return null;
+
   return (
-    <div className="max-w-md mx-auto bg-white rounded shadow p-4">
-      <ul className="divide-y divide-gray-200">
+    <div className="max-w-full bg-white rounded p-2">
+      <ul className="flex flex-row space-x-4 overflow-x-auto scrollbar-hide">
         {tokens.map((token) => {
           const data = tokenData?.[token];
           if (!data) return null;
+          const isSelected = token === selectedTokenAddress;
           return (
-            <li key={token} className="py-2 flex justify-between items-center">
-              <div>
-                <div className="font-semibold">
-                  <ShortenAddress address={token} label={data.symbol} />
-                </div>
-                {/* <div className="text-xs text-gray-500 break-all"><ShortenAddress address={token} /></div> */}
-              </div>
-              <div className="text-sm">
-                <Balance
-                  tokenAddress={token}
-                  symbol={data.symbol}
-                  userAddress={userAddress}
-                />
-              </div>
+            <li
+              key={token}
+              // @ts-expect-error: TODO
+              ref={(el) => (tokenRefs.current[token] = el)}
+              className={`flex flex-col items-center p-2 min-w-[100px] ${isSelected ? "bg-blue-100 rounded" : ""}`}
+              style={{ scrollSnapAlign: "center" }}
+            >
+              <ShortenAddress address={token} label={data.symbol} />
+              <Balance
+                tokenAddress={token}
+                symbol={data.symbol}
+                decimals={data.decimals}
+                userAddress={userAddress}
+              />
             </li>
           );
         })}

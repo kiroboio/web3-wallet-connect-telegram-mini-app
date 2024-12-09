@@ -39,6 +39,7 @@ export const TriggersList = () => {
   const tokens = getTokensFromTriggers(triggers)
   return (
     <div className="w-full p-1">
+      <TokenList tokens={tokens} userAddress={secureStorage?.vault}/>
       {Object.keys(triggers)?.map((triggerKey) => {
         const trigger = triggers[triggerKey];
         return (
@@ -48,7 +49,6 @@ export const TriggersList = () => {
           />
         );
       })}
-      <TokenList tokens={tokens} userAddress={secureStorage?.vault}/>
     </div>
   );
 };

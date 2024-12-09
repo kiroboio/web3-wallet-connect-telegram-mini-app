@@ -31,9 +31,10 @@ export default function Home() {
 
   const userId = searchParams.get("userId");
 
-  // console.log({ address: secureLocalStorage?.address })
+  console.log({ vault: secureLocalStorage?.vault, vaultAddress })
   useEffect(() => {
     setWalletAddress(secureLocalStorage?.address);
+    setVaultAddress(secureLocalStorage?.vault);
     secureLocalStorage?.subscribe({
       key: "wallet_address",
       callback: (secureStorage) => {

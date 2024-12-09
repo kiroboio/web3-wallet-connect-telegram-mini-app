@@ -134,12 +134,14 @@ export const HandleWalletEvents = ({ userId }: { userId?: string | null }) => {
         message,
         encodedValues,
         intentId,
+        triggerId,
         type,
         externalVariables,
       }: {
         message: string;
         encodedValues: string[];
         intentId: string;
+        triggerId: string;
         type: TriggerType;
         externalVariables: ExternalVariables;
       }) => {
@@ -156,7 +158,7 @@ export const HandleWalletEvents = ({ userId }: { userId?: string | null }) => {
           userId,
           externalVariables,
           secureLocalStorage,
-        })['signMessage'].handleEvent({ message, encodedValues, intentId, type, externalVariables})
+        })['signMessage'].handleEvent({ message, encodedValues, intentId, type, externalVariables, triggerId })
 
       }
     );
@@ -204,6 +206,24 @@ export const HandleWalletEvents = ({ userId }: { userId?: string | null }) => {
         });
       }
     );
+
+     socket.on("executionStatus", async ({ intentId, triggerId, externalVariables, error, data }) => {
+
+      if (!secureLocalStorage?.address) {
+        alert("No wallet found!");
+        return;
+      }
+
+      getEvents({
+        address: secureLocalStorage.address,
+        provider: sepoliaProvider,
+        intentId,
+        socket,
+        userId,
+        externalVariables,
+        secureLocalStorage,
+      })['executionStatus'].handleEvent({ intentId, triggerId, error, data })
+     })
 
     socket.on("removeTrigger", async ({ triggerId, intentId }) => {
       console.log({ remove: true, triggerId, intentId });

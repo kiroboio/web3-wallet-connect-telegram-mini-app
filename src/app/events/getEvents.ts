@@ -27,7 +27,8 @@ export type TriggerSubscriptionParams = {
     time: Date;
     values: ExternalVariables;
     status?: "succeed" | "error";
-    message?: string;
+    error?: string;
+    data?: unknown
   }[];
 };
 export type TriggerType =
@@ -101,7 +102,7 @@ export const getEvents = ({
         }
       });
 
-      secureLocalStorage.addTriggerExecution(SCHEMA.TRIGGER, { intentId, triggerId: 'tokenTransfer', execution: { time: new Date(), values: externalVariables }})
+      // secureLocalStorage.addTriggerExecution(SCHEMA.TRIGGER, { intentId, triggerId: 'tokenTransfer', execution: { time: new Date(), values: externalVariables }})
       socket?.emit("triggerValues", {
         userId: Number(userId),
         triggerId: 'tokenTransfer',
@@ -149,7 +150,7 @@ export const getEvents = ({
         variable.value = amountOut;
       });
 
-      secureLocalStorage?.addTriggerExecution(SCHEMA.TRIGGER, { intentId, triggerId: 'protectedSwap', execution: { time: new Date(), values: externalVariables }})
+      //secureLocalStorage?.addTriggerExecution(SCHEMA.TRIGGER, { intentId, triggerId: 'protectedSwap', execution: { time: new Date(), values: externalVariables }})
       socket?.emit("triggerProtectedSwap", {
         userId: Number(userId),
         triggerId: "protectedSwap",
@@ -165,12 +166,14 @@ export const getEvents = ({
       message,
       encodedValues,
       intentId,
+      triggerId,
       type,
       externalVariables,
     }: {
       message: string;
       encodedValues: string[];
       intentId: string;
+      triggerId: string;
       type: TriggerType;
       externalVariables: ExternalVariables;
     }) {
@@ -188,13 +191,34 @@ export const getEvents = ({
           userId: Number(userId),
           signature,
           encodedValues,
+          externalVariables,
           intentId,
+          triggerId,
         });
-        console.log({ signature, encodedValues, intentId, message });
+        console.log({ signature, encodedValues, intentId, message, triggerId });
       };
 
       console.log({ externalVariables, type });
       emitSignatureMessage();
     }
-  }
+  },
+  executionStatus: {
+    type: 'status' as const,
+    filter: undefined,
+    handleEvent: async function({ intentId, triggerId, data, error }: {
+      intentId: string;
+      triggerId: string;
+      data: unknown;
+      error?: string;
+    }) {
+
+      console.log({ executionStatusData: data, error, intentId, triggerId, externalVariables })
+      if(error) {
+        secureLocalStorage?.addTriggerExecution(SCHEMA.TRIGGER, { intentId, triggerId, execution: { time: new Date(), values: externalVariables, error, status: 'error' }})
+      } else {
+        secureLocalStorage?.addTriggerExecution(SCHEMA.TRIGGER, { intentId, triggerId, execution: { time: new Date(), values: externalVariables, error: undefined, data, status: 'succeed' }})
+      }
+
+    }
+  },
 });
