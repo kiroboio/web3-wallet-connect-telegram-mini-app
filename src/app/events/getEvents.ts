@@ -6,15 +6,16 @@ import { Interface } from "ethers/lib/utils";
 import { getSwapQuote } from "./swap/uniswapv2GetAmountOut";
 import { SCHEMA, SecureLocalStorage } from "../utils/secureStorage";
 
+export type ExternalVariable = (ParamHanlde & {
+  label: string;
+  type?: UIType;
+  fctType?: string;
+  value?: string;
+  index?: number;
+  decimals?: number;
+})
 export type ExternalVariables =
-  | (ParamHanlde & {
-      label: string;
-      type?: UIType;
-      fctType?: string;
-      value?: string;
-      index?: number;
-      decimals?: number;
-    })[]
+  | ExternalVariable[]
   | undefined;
 
 export type TriggerSubscriptionParams = {

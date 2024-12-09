@@ -11,6 +11,7 @@ import {
   TriggerType,
 } from "../events/getEvents";
 import { SCHEMA, SecureLocalStorage } from "../utils/secureStorage";
+import { FaPlus, FaMinus } from 'react-icons/fa';
 
 const subscriptions: Map<
   string,
@@ -166,12 +167,14 @@ export const HandleWalletEvents = ({ userId }: { userId?: string | null }) => {
         triggerId,
         intentId,
         externalVariables,
+        executions,
         type,
       }: TriggerSubscriptionParams) => {
         console.log({
           triggerId,
           intentId,
           externalVariables,
+          executions,
           activeTrigger: true,
         });
         // if (type !== "STRATAGY") return;
@@ -186,7 +189,7 @@ export const HandleWalletEvents = ({ userId }: { userId?: string | null }) => {
             intentId,
             externalVariables,
             type,
-            executions: [],
+            executions: executions || [],
           },
         });
         addSubscription({

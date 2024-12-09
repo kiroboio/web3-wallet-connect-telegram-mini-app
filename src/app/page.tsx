@@ -7,7 +7,7 @@ import { IconWithText } from "./components/IconWithText";
 import { ImportWalletModal } from "./components/WalletModals/ImportWallet";
 import { CreateWalletModal } from "./components/WalletModals/CreateWallet";
 
-import WalletAddress from "./components/WaletAddress";
+import { WalletInfo } from "./components/WalletInfo";
 import { SocketProvider } from "./context/SocketProvider";
 import { useSearchParams } from "next/navigation";
 import { HandleWalletEvents } from "./components/HandleWalletEvents";
@@ -23,6 +23,9 @@ export default function Home() {
   const [walletAddress, setWalletAddress] = useState(
     secureLocalStorage?.address
   );
+  const [vaultAddress, setVaultAddress] = useState(
+    secureLocalStorage?.vault
+  );
 
   const searchParams = useSearchParams();
 
@@ -35,6 +38,7 @@ export default function Home() {
       key: "wallet_address",
       callback: (secureStorage) => {
         setWalletAddress(secureStorage.address);
+        setVaultAddress(secureStorage.vault);
       },
     });
   }, [secureLocalStorage]);
@@ -86,10 +90,11 @@ export default function Home() {
     }
 
     if (!walletAddress) return "Not Connected";
-
+    if (!vaultAddress) return "Runner Not Connected";
     return (
-      <WalletAddress
+      <WalletInfo
         address={walletAddress}
+        vault={vaultAddress}
         privateKey={secureLocalStorage.privateKey}
       />
     );

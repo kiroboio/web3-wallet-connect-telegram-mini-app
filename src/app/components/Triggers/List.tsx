@@ -3,6 +3,10 @@ import { SCHEMA } from "@/app/utils/secureStorage";
 import { TriggerCard } from "./Card";
 import { useEffect, useState } from "react";
 import { TriggerSubscriptionParams } from "@/app/events/getEvents";
+import { TokenList } from "./TokensList";
+import { getTokensFromTriggers } from "@/app/utils/getTokensFromTriggers";
+import { fetchInitialTokenData } from "@/app/utils/tokens";
+import { getProvider } from "@/app/events/provider/provider";
 
 export const TriggersList = () => {
   const secureStorage = useSecureStorage();
@@ -32,14 +36,19 @@ export const TriggersList = () => {
   if (!triggers) return null;
 
   console.log({ storedTriggers, triggers });
-  return Object.keys(triggers)?.map((triggerKey) => {
-    const trigger = triggers[triggerKey];
-
-    return (
-      <TriggerCard
-        key={`${trigger.intentId}_${trigger.triggerId}`}
-        trigger={trigger}
-      />
-    );
-  });
+  const tokens = getTokensFromTriggers(triggers)
+  return (
+    <div>
+      {Object.keys(triggers)?.map((triggerKey) => {
+        const trigger = triggers[triggerKey];
+        return (
+          <TriggerCard
+            key={`${trigger.intentId}_${trigger.triggerId}`}
+            trigger={trigger}
+          />
+        );
+      })}
+      <TokenList tokens={tokens} userAddress={secureStorage?.vault}/>
+    </div>
+  );
 };
