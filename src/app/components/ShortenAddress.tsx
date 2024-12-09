@@ -5,6 +5,7 @@ import { FaClipboard, FaCheck } from "react-icons/fa";
 
 interface WalletAddressProps {
   address: string;
+  label?: string;
   title?: string;
 }
 
@@ -14,7 +15,8 @@ const shortenAddress = (addr: string) => {
 
 export const ShortenAddress: React.FC<WalletAddressProps> = ({
   address,
-  title
+  label,
+  title,
 }) => {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
@@ -27,13 +29,13 @@ export const ShortenAddress: React.FC<WalletAddressProps> = ({
   return (
     <div
       onClick={handleCopy}
-      className="flex flex-row p-2 hover:bg-gray-100"
-      title={`copy ${title || 'address'} to clipboard`}
+      className="inline-flex items-center p-2 hover:bg-gray-100 cursor-pointer"
+      title={`copy ${title || "address"} to clipboard`}
     >
-      <span className="text-sm font-mono">{shortenAddress(address)}</span>
-      <div className="ml-2 text-gray-500">
+      <span className="text-sm font-mono">{label || shortenAddress(address)}</span>
+      <span className="ml-2 text-gray-500">
         {copied ? <FaCheck /> : <FaClipboard />}
-      </div>
+      </span>
     </div>
   );
 };

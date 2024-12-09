@@ -2,6 +2,8 @@ import { TriggerSubscriptionParams } from "@/app/events/getEvents";
 import { useMemo } from "react";
 import { Toggle } from "../Toggle";
 import { VariableItem } from "./VariableItem";
+import { ShortenAddress } from "../ShortenAddress";
+import { convertToSentenceCase } from "@/app/utils/text";
 
 export const TriggerCard = ({
   trigger,
@@ -21,10 +23,10 @@ export const TriggerCard = ({
   }, [trigger.externalVariables]);
 
   return (
-    <div className="card bg-base-100 shadow-md p-4 mb-4">
+    <div className="card w-full bg-base-100 shadow-md p-4 mb-4">
       <div className="card-body space-y-4">
-        <h2 className="card-title">{trigger.triggerId}</h2>
-        <p className="text-sm text-gray-500">Intent ID: {trigger.intentId}</p>
+        <h2 className="card-title">{convertToSentenceCase(trigger.triggerId)}</h2>
+        <div className="text-sm text-gray-500">ID: <ShortenAddress address={trigger.intentId} title="Intent Id"/></div>
         <p className="text-sm text-gray-500">Type: {trigger.type}</p>
 
         {sortedVariables.length > 0 && (

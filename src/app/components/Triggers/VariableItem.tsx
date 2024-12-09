@@ -1,5 +1,6 @@
 import { ExternalVariable } from "@/app/events/getEvents";
 import React from "react";
+import { ShortenAddress } from "../ShortenAddress";
 
 export const VariableItem = ({ variable}: { variable: ExternalVariable }) => {
   if (!variable) return null;
@@ -14,7 +15,7 @@ export const VariableItem = ({ variable}: { variable: ExternalVariable }) => {
       {variable.type && (
         <div className="text-xs text-gray-600">Type: {variable.type}</div>
       )}
-      <div className="text-sm text-gray-700">Value: {variable.value}</div>
+      <div className="text-sm text-gray-700">Value: {variable.value && variable.value !== 'FROM_TRIGGER' && variable.fctType === 'address'  ? <ShortenAddress address={variable.value} title={`${variable.label} address`}/> : variable.value }</div>
     </div>
   );
 };

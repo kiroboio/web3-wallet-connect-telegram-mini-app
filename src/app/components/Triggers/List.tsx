@@ -38,7 +38,7 @@ export const TriggersList = () => {
   console.log({ storedTriggers, triggers });
   const tokens = getTokensFromTriggers(triggers)
   return (
-    <div>
+    <div className="w-full p-1">
       {Object.keys(triggers)?.map((triggerKey) => {
         const trigger = triggers[triggerKey];
         return (
