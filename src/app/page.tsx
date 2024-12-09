@@ -103,8 +103,8 @@ export default function Home() {
   return (
     <SocketProvider userId={Number(userId)}>
       <main className="min-h-screen py-0 pb-12 flex flex-col items-center bg-white">
-        <header className="w-full py-4 flex justify-center items-center">
-          <div className="flex w-full rounded justify-between items-center overflow-hidden shadow-lg bg-white px-4">
+        <header className="w-full flex justify-center items-center">
+          <div className="flex w-full  justify-between items-center overflow-hidden  bg-white px-4">
             <IconWithText
               icon={
                 <FaWallet

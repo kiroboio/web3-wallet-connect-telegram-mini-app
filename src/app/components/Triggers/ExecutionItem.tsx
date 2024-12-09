@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { VariableItem } from "./VariableItem";
 
 import { FaPlus, FaMinus } from "react-icons/fa";
@@ -10,12 +10,14 @@ import parse from "html-react-parser";
 import "./ExecutionItem.css";
 interface ExecutionComponentProps {
   execution: TriggerSubscriptionParams["executions"][number];
+  setSelectedTokenAddress?: Dispatch<SetStateAction<string | undefined>>;
   success?: boolean;
   error?: string; // HTML string (e.g., contains <b> etc.), but we will show it as raw text
 }
 
 export const ExecutionItem: React.FC<ExecutionComponentProps> = ({
   execution,
+  setSelectedTokenAddress,
 }) => {
   const error = execution.error;
   const success = execution.status === "succeed";
@@ -63,7 +65,7 @@ export const ExecutionItem: React.FC<ExecutionComponentProps> = ({
               <VariableItem
                 key={val.handle}
                 variable={val}
-                // no success/error here since not specified, just normal rendering
+                setSelectedTokenAddress={setSelectedTokenAddress}
               />
             ))}
           </div>

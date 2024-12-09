@@ -29,20 +29,25 @@ export async function fetchInitialTokenData(
   const tokenDataMap: { [address: string]: TokenData } = {};
 
   for (const tokenAddress of tokens) {
-    const tokenContract = new Contract(tokenAddress, ERC20_ABI, provider);
-    const [symbol, decimals, rawBalance] = await Promise.all([
-      tokenContract.symbol(),
-      tokenContract.decimals(),
-      tokenContract.balanceOf(userAddress),
-    ]);
+    try {
+      const tokenContract = new Contract(tokenAddress, ERC20_ABI, provider);
+      const [symbol, decimals, rawBalance] = await Promise.all([
+        tokenContract.symbol(),
+        tokenContract.decimals(),
+        tokenContract.balanceOf(userAddress),
+      ]);
 
-    const formattedBalance = formatUnits(rawBalance, decimals);
+      const formattedBalance = formatUnits(rawBalance, decimals);
 
-    tokenDataMap[tokenAddress] = {
-      symbol,
-      decimals,
-      balance: formattedBalance,
-    };
+      tokenDataMap[tokenAddress] = {
+        symbol,
+        decimals,
+        balance: formattedBalance,
+      };
+    } catch (e) {
+      console.error(e);
+      continue;
+    }
   }
 
   return tokenDataMap;
@@ -73,9 +78,8 @@ export function subscribeToBalanceChanges({
 
     const formattedBalance = formatUnits(rawBalance, decimals);
 
-    onBalanceChange(formattedBalance)
+    onBalanceChange(formattedBalance);
   };
-
 
   provider.on("block", handleNewBlock);
 

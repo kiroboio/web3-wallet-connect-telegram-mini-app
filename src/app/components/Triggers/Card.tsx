@@ -1,5 +1,5 @@
 import { TriggerSubscriptionParams } from "@/app/events/getEvents";
-import { useMemo } from "react";
+import { Dispatch, SetStateAction, useMemo } from "react";
 import { Toggle } from "../Toggle";
 import { VariableItem } from "./VariableItem";
 import { ShortenAddress } from "../ShortenAddress";
@@ -8,8 +8,10 @@ import { ExecutionItem } from "./ExecutionItem";
 
 export const TriggerCard = ({
   trigger,
+  setSelectedTokenAddress,
 }: {
   trigger: TriggerSubscriptionParams;
+  setSelectedTokenAddress?: Dispatch<SetStateAction<string | undefined>>;
 }) => {
   const sortedVariables = useMemo(() => {
     if (!trigger.externalVariables) return [];
@@ -48,13 +50,14 @@ export const TriggerCard = ({
                   }
 
                   return (
-                    <VariableItem key={variable.handle} variable={variable} />
+                    <VariableItem key={variable.handle} variable={variable} setSelectedTokenAddress={setSelectedTokenAddress} />
                   );
                 })}
               </div>
             </Toggle>
+            <div className="py-2">
             {trigger.executions && trigger.executions.length > 0 && (
-            <Toggle label="executions" initValue={true}>
+            <Toggle label="executions"  initValue={true}>
               <div className="mt-4">
                 <div className="mt-4 space-y-4">
                   {trigger.executions.map(
@@ -73,6 +76,7 @@ export const TriggerCard = ({
                             <ExecutionItem
                               key={execution.time.toString()}
                               execution={execution}
+                              setSelectedTokenAddress={setSelectedTokenAddress}
                             />
                           </div>
                         </div>
@@ -83,6 +87,7 @@ export const TriggerCard = ({
               </div>
               </Toggle>
             )}
+            </div>
           </div>
         )}
       </div>

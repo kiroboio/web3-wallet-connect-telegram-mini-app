@@ -5,13 +5,12 @@ import { useEffect, useState } from "react";
 import { TriggerSubscriptionParams } from "@/app/events/getEvents";
 import { TokenList } from "./TokensList";
 import { getTokensFromTriggers } from "@/app/utils/getTokensFromTriggers";
-import { fetchInitialTokenData } from "@/app/utils/tokens";
-import { getProvider } from "@/app/events/provider/provider";
+
 
 export const TriggersList = () => {
   const secureStorage = useSecureStorage();
   const storedTriggers = secureStorage?.getTriggersData(SCHEMA.TRIGGER);
-
+  const [selectedTokenAddress, setSelectedTokenAddress] = useState<string | undefined>()
   const [triggers, setTriggers] = useState<
     | {
         [key: string]: TriggerSubscriptionParams;
@@ -38,14 +37,15 @@ export const TriggersList = () => {
   console.log({ storedTriggers, triggers });
   const tokens = getTokensFromTriggers(triggers)
   return (
-    <div className="w-full p-1">
-      <TokenList tokens={tokens} userAddress={secureStorage?.vault}/>
+    <div className="w-full">
+      <TokenList tokens={tokens} userAddress={secureStorage?.vault} selectedTokenAddress={selectedTokenAddress}/>
       {Object.keys(triggers)?.map((triggerKey) => {
         const trigger = triggers[triggerKey];
         return (
           <TriggerCard
             key={`${trigger.intentId}_${trigger.triggerId}`}
             trigger={trigger}
+            setSelectedTokenAddress={setSelectedTokenAddress}
           />
         );
       })}

@@ -25,14 +25,32 @@ export const TokenList: React.FC<TokenListProps> = ({
   useEffect(() => {
     (async () => {
       if (!userAddress) return;
-      const tokensData = await fetchInitialTokenData(tokens, userAddress, provider);
-      const updatedData: { [address: string]: { symbol: string; balance: string, decimals: number } } = {};
-      for (const token of tokens) {
-        const data = tokensData[token];
-        if (!data) continue;
-        updatedData[token] = { symbol: data.symbol, balance: data.balance, decimals: data.decimals };
+      try {
+        const tokensData = await fetchInitialTokenData(
+          tokens,
+          userAddress,
+          provider
+        );
+        const updatedData: {
+          [address: string]: {
+            symbol: string;
+            balance: string;
+            decimals: number;
+          };
+        } = {};
+        for (const token of tokens) {
+          const data = tokensData[token];
+          if (!data) continue;
+          updatedData[token] = {
+            symbol: data.symbol,
+            balance: data.balance,
+            decimals: data.decimals,
+          };
+        }
+        setTokenData(updatedData);
+      } catch (e) {
+        console.error(e);
       }
-      setTokenData(updatedData);
     })();
   }, [tokens, userAddress, provider]);
 
@@ -50,7 +68,7 @@ export const TokenList: React.FC<TokenListProps> = ({
   if (!userAddress) return null;
 
   return (
-    <div className="max-w-full bg-white rounded p-2">
+    <div className="sticky top-0 max-w-full bg-white shadow">
       <ul className="flex flex-row space-x-4 overflow-x-auto scrollbar-hide">
         {tokens.map((token) => {
           const data = tokenData?.[token];
@@ -59,9 +77,13 @@ export const TokenList: React.FC<TokenListProps> = ({
           return (
             <li
               key={token}
-              // @ts-expect-error: TODO
-              ref={(el) => (tokenRefs.current[token] = el)}
-              className={`flex flex-col items-center p-2 min-w-[100px] ${isSelected ? "bg-blue-100 rounded" : ""}`}
+
+              ref={(el) => {
+                tokenRefs.current[token] = el 
+              }}
+              className={`flex flex-col items-center p-2 min-w-[100px] transition-colors duration-200 hover:bg-gray-200 hover:shadow-sm ${
+                isSelected ? "bg-gray-200" : ""
+              }`}
               style={{ scrollSnapAlign: "center" }}
             >
               <ShortenAddress address={token} label={data.symbol} />
