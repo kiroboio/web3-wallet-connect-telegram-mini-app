@@ -23,15 +23,13 @@ export default function Home() {
   const [walletAddress, setWalletAddress] = useState(
     secureLocalStorage?.address
   );
-  const [vaultAddress, setVaultAddress] = useState(
-    secureLocalStorage?.vault
-  );
+  const [vaultAddress, setVaultAddress] = useState(secureLocalStorage?.vault);
 
   const searchParams = useSearchParams();
 
   const userId = searchParams.get("userId");
 
-  console.log({ vault: secureLocalStorage?.vault, vaultAddress })
+  console.log({ vault: secureLocalStorage?.vault, vaultAddress });
   useEffect(() => {
     setWalletAddress(secureLocalStorage?.address);
     setVaultAddress(secureLocalStorage?.vault);
@@ -103,7 +101,10 @@ export default function Home() {
   return (
     <SocketProvider userId={Number(userId)}>
       <main className="min-h-screen py-0 pb-12 flex flex-col items-center bg-white">
-        <header className="w-full flex justify-center items-center">
+        <header
+          className="w-full flex justify-center items-center shadow"
+          style={{ borderBottomWidth: "1px" }}
+        >
           <div className="flex w-full  justify-between items-center overflow-hidden  bg-white px-4">
             <IconWithText
               icon={

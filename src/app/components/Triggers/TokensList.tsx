@@ -68,7 +68,10 @@ export const TokenList: React.FC<TokenListProps> = ({
   if (!userAddress) return null;
 
   return (
-    <div className="sticky top-0 max-w-full bg-white shadow">
+    <div
+      className="sticky top-0 max-w-full bg-white border-gray-300 shadow"
+      style={{ borderTopWidth: "1px", borderBottomWidth: "1px" }}
+    >
       <ul className="flex flex-row space-x-4 overflow-x-auto scrollbar-hide">
         {tokens.map((token) => {
           const data = tokenData?.[token];
@@ -77,9 +80,8 @@ export const TokenList: React.FC<TokenListProps> = ({
           return (
             <li
               key={token}
-
               ref={(el) => {
-                tokenRefs.current[token] = el 
+                tokenRefs.current[token] = el;
               }}
               className={`flex flex-col items-center p-2 min-w-[100px] transition-colors duration-200 hover:bg-gray-200 hover:shadow-sm ${
                 isSelected ? "bg-gray-200" : ""

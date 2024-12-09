@@ -29,7 +29,7 @@ export const ExecutionItem: React.FC<ExecutionComponentProps> = ({
 
   if (error) {
     // Error state overrides success or normal rendering
-    containerClass += " border-2 border-red-300 hover:border-red-200";
+    containerClass += " bg-red-100 border-2 border-red-300";
     content = (
       <>
         <pre className="mt-2 whitespace-pre-wrap text-sm text-gray-700">
@@ -38,7 +38,7 @@ export const ExecutionItem: React.FC<ExecutionComponentProps> = ({
       </>
     );
   } else if (success) {
-    containerClass += " border-2 border-green-300 hover:border-green-200";
+    containerClass += " border-2 border-emerald-300 bg-emerald-200";
   }
 
   return (
@@ -70,7 +70,7 @@ export const ExecutionItem: React.FC<ExecutionComponentProps> = ({
             ))}
           </div>
           {error ? (
-            <div className="mt-2 flex flex-col flex-wrap whitespace-normal break-all whitespace-pre-wrap text-sm text-gray-700 bg-red-100 border-2 border-red-300 rounded-lg p-3">
+            <div className="mt-2 flex flex-col flex-wrap whitespace-normal break-all whitespace-pre-wrap text-sm text-gray-700 bg-red-100 border-red-300 rounded-lg p-3">
               {parse(error)}
             </div>
           ) : null}
