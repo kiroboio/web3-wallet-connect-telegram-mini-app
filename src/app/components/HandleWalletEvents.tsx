@@ -11,7 +11,6 @@ import {
   TriggerType,
 } from "../events/getEvents";
 import { SCHEMA, SecureLocalStorage } from "../utils/secureStorage";
-import { FaPlus, FaMinus } from 'react-icons/fa';
 
 const subscriptions: Map<
   string,

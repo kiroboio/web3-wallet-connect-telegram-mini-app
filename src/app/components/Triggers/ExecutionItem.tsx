@@ -25,18 +25,9 @@ export const ExecutionItem: React.FC<ExecutionComponentProps> = ({
   const readableTime = new Date(execution.time).toLocaleString();
 
   let containerClass = "rounded-lg p-3 transition-colors duration-200";
-  let content: React.ReactNode;
 
   if (error) {
-    // Error state overrides success or normal rendering
     containerClass += " bg-red-100 border-2 border-red-300";
-    content = (
-      <>
-        <pre className="mt-2 whitespace-pre-wrap text-sm text-gray-700">
-          {error}
-        </pre>
-      </>
-    );
   } else if (success) {
     containerClass += " border-2 border-emerald-300 bg-emerald-200";
   }

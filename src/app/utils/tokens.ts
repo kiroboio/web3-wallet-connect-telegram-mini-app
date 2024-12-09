@@ -1,17 +1,10 @@
-import { Contract, providers } from "ethers";
+import { Contract } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
 import { JsonRpcProvider } from "@ethersproject/providers";
 interface TokenData {
   symbol: string;
   decimals: number;
   balance: string; // formatted balance string
-}
-
-interface BlockchainLogicOptions {
-  tokens: string[];
-  userAddress: string;
-  provider: JsonRpcProvider;
-  onBalanceChange: (updatedTokenData: { [address: string]: TokenData }) => void;
 }
 
 // Minimal ERC20 ABI
@@ -67,11 +60,8 @@ export function subscribeToBalanceChanges({
   const handleNewBlock = async () => {
     // Fetch current token data
     const tokenContract = new Contract(tokenAddress, ERC20_ABI, provider);
-    // We assume we have previously fetched symbol and decimals
-    // For a real implementation, symbol/decimals should be cached or re-fetched if needed
-    // Here, we re-fetch them each time, but you can optimize by storing these somewhere
-    const [_symbol, decimals, rawBalance] = await Promise.all([
-      tokenContract.symbol(),
+
+    const [decimals, rawBalance] = await Promise.all([
       tokenContract.decimals(),
       tokenContract.balanceOf(userAddress),
     ]);

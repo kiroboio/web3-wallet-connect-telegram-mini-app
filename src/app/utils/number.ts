@@ -26,6 +26,7 @@ const subscriptMap = {
   export function getDisplayPriceWithShortedZeroes(price: string) {
     const priceStr = price;
   
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_integerPart, fractionalPart] = priceStr.split('.');
   
     if (!fractionalPart) {

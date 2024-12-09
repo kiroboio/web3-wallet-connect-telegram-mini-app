@@ -42,15 +42,7 @@ export const TriggerCard = ({
               <Toggle label="inputs">
                 <div className="mt-4 space-y-2">
                   {sortedVariables.map((variable) => {
-                    let displayValue = variable.value;
-                    if (
-                      variable.decimals !== undefined &&
-                      variable.value &&
-                      !isNaN(Number(variable.value))
-                    ) {
-                      displayValue = variable.value; //weiToEth(variable.value, variable.decimals);
-                    }
-
+                 
                     return (
                       <VariableItem
                         key={variable.handle}
@@ -70,9 +62,6 @@ export const TriggerCard = ({
                           (
                             execution: TriggerSubscriptionParams["executions"][number]
                           ) => {
-                            const readableTime = new Date(
-                              execution.time
-                            ).toLocaleString();
                             return (
                               <div
                                 key={execution.time.toString()}

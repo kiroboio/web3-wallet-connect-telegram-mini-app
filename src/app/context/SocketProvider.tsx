@@ -78,6 +78,7 @@ export const SocketProvider: React.FC<{
       clearInterval(pingInterfal);
       newSocket.removeAllListeners();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, secureLocalStorage?.address, secureLocalStorage?.vault]);
 
   useEffect(() => {
@@ -88,6 +89,7 @@ export const SocketProvider: React.FC<{
 
       socket?.disconnect();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [secureLocalStorage?.address]);
 
   return (

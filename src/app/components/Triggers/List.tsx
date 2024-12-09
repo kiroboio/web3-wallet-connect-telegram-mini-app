@@ -19,7 +19,7 @@ export const TriggersList = () => {
   >(storedTriggers);
 
   useEffect(() => {
-    setTriggers(storedTriggers);
+    //setTriggers(storedTriggers);
     secureStorage?.subscribe({
       key: "triggers_list",
       callback: (secureStorage) => {
