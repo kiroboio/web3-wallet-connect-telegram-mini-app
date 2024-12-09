@@ -4,13 +4,13 @@ import { Toggle } from "../Toggle";
 import { VariableItem } from "./VariableItem";
 import { ShortenAddress } from "../ShortenAddress";
 import { convertToSentenceCase } from "@/app/utils/text";
+import { ExecutionItem } from "./ExecutionItem";
 
 export const TriggerCard = ({
   trigger,
 }: {
   trigger: TriggerSubscriptionParams;
 }) => {
-
   const sortedVariables = useMemo(() => {
     if (!trigger.externalVariables) return [];
 
@@ -23,16 +23,19 @@ export const TriggerCard = ({
   }, [trigger.externalVariables]);
 
   return (
-    <div className="card w-full bg-base-100 shadow-md p-4 mb-4">
+    <div className="card w-full bg-base-100 shadow rounded-md p-4 mb-4">
       <div className="card-body space-y-4">
-        <h2 className="card-title">{convertToSentenceCase(trigger.triggerId)}</h2>
-        <div className="text-sm text-gray-500">ID: <ShortenAddress address={trigger.intentId} title="Intent Id"/></div>
+        <h2 className="card-title">
+          {convertToSentenceCase(trigger.triggerId)}
+        </h2>
+        <div className="text-sm text-gray-500">
+          ID: <ShortenAddress address={trigger.intentId} title="Intent Id" />
+        </div>
         <p className="text-sm text-gray-500">Type: {trigger.type}</p>
 
         {sortedVariables.length > 0 && (
           <div>
-
-            <Toggle label="values">
+            <Toggle label="inputs" initValue={true}>
               <div className="mt-4 space-y-2">
                 {sortedVariables.map((variable) => {
                   let displayValue = variable.value;
@@ -45,41 +48,39 @@ export const TriggerCard = ({
                   }
 
                   return (
-                   <VariableItem key={variable.handle} variable={variable} />
+                    <VariableItem key={variable.handle} variable={variable} />
                   );
                 })}
               </div>
             </Toggle>
             {trigger.executions && trigger.executions.length > 0 && (
-              <Toggle label="executions">
-                <div className="mt-4">
-                  <div className="mt-4 space-y-4">
-                    {trigger.executions.map(
-                      (
-                        execution: TriggerSubscriptionParams["executions"][number],
-                      ) => {
-                        const readableTime = new Date(
-                          execution.time
-                        ).toLocaleString();
-                        return (
-                          <div
-                            key={execution.time.toString()}
-                            className="border border-base-300 rounded-lg p-3"
-                          >
-                            <div className="font-semibold">
-                              {readableTime}
-                            </div>
-                            <div className="mt-2 space-y-2">
-                              {execution.values?.map((val) => {
-                                return <VariableItem key={val.handle} variable={val} />
-                              })}
-                            </div>
+            <Toggle label="executions" initValue={true}>
+              <div className="mt-4">
+                <div className="mt-4 space-y-4">
+                  {trigger.executions.map(
+                    (
+                      execution: TriggerSubscriptionParams["executions"][number]
+                    ) => {
+                      const readableTime = new Date(
+                        execution.time
+                      ).toLocaleString();
+                      return (
+                        <div
+                          key={execution.time.toString()}
+                          //className="border border-base-300 rounded-lg p-3"
+                        >
+                          <div className="mt-2 space-y-2">
+                            <ExecutionItem
+                              key={execution.time.toString()}
+                              execution={execution}
+                            />
                           </div>
-                        );
-                      }
-                    )}
-                  </div>
+                        </div>
+                      );
+                    }
+                  )}
                 </div>
+              </div>
               </Toggle>
             )}
           </div>

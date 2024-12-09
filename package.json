@@ -20,6 +20,7 @@
     "classnames": "^2.5.1",
     "daisyui": "^4.12.14",
     "ethers": "5.7.2",
+    "html-react-parser": "^5.2.0",
     "next": "15.0.2",
     "react": "19.0.0-rc-02c0e824-20241028",
     "react-dom": "19.0.0-rc-02c0e824-20241028",

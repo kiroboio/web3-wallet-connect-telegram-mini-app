@@ -64,6 +64,8 @@ export const SocketProvider: React.FC<{
       Object.keys(triggers).forEach((key) => {
         const trigger = triggers[key];
         console.log({ reconnectTrigger: trigger });
+        if(trigger.type !== 'STRATAGY') return
+        
         newSocket.emit("reconnectTrigger", { data: trigger, userId });
       });
     });

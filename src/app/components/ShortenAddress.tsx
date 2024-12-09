@@ -29,7 +29,7 @@ export const ShortenAddress: React.FC<WalletAddressProps> = ({
   return (
     <div
       onClick={handleCopy}
-      className="inline-flex items-center p-2 hover:bg-gray-100 cursor-pointer"
+      className="inline-flex items-center p-2 hover:bg-gray-100 cursor-pointer rounded"
       title={`copy ${title || "address"} to clipboard`}
     >
       <span className="text-sm font-mono">{label || shortenAddress(address)}</span>

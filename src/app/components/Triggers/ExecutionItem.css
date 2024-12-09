@@ -1,0 +1,6 @@
+pre {
+    display: flex;
+    flex-wrap: wrap;
+    white-space: normal;
+    line-break: normal;
+}
