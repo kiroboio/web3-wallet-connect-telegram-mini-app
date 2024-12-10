@@ -14,6 +14,11 @@ import { HandleWalletEvents } from "./components/HandleWalletEvents";
 import { useSecureStorage } from "./context/SecureStorageProvider";
 import { Spinner } from "./components/Spinner";
 import { TriggersList } from "./components/Triggers/List";
+import { ChainId } from "./utils/alchemy";
+import { SCHEMA } from "./utils/secureStorage";
+
+
+const chainId: ChainId = '11155111'
 
 export default function Home() {
   const [isImportOpen, setIsImportOpen] = useState(false);
@@ -37,8 +42,16 @@ export default function Home() {
       key: "wallet_address",
       callback: (secureStorage) => {
         setWalletAddress(secureStorage.address);
+      },
+      type: SCHEMA.ADDRESS,
+    });
+
+    secureLocalStorage?.subscribe({
+      key: "wallet_address",
+      callback: (secureStorage) => {
         setVaultAddress(secureStorage.vault);
       },
+      type: SCHEMA.VAULT,
     });
   }, [secureLocalStorage]);
 
@@ -127,9 +140,9 @@ export default function Home() {
           isOpen={isCreateOpen}
           onClose={() => setIsCreateOpen(false)}
         />
-        <TriggersList />
+        <TriggersList chainId={chainId} />
       </main>
-      <HandleWalletEvents userId={userId} />
+      <HandleWalletEvents userId={userId} chainId={chainId} />
     </SocketProvider>
   );
 }

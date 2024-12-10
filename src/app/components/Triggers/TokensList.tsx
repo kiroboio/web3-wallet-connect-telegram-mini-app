@@ -3,78 +3,46 @@ import { fetchInitialTokenData } from "@/app/utils/tokens";
 import React, { useEffect, useRef, useState } from "react";
 import { Balance } from "./Balance";
 import { ShortenAddress } from "../ShortenAddress";
-import { getUserTokens } from "@/app/utils/alchemy";
+import { ChainId, fetchUserTokens, getUserTokens } from "@/app/utils/alchemy";
+import { TriggerSubscriptionParams } from "@/app/events/getEvents";
 
 interface TokenListProps {
   tokens: string[];
+  chainId: ChainId;
+  triggers: {
+    [key: string]: TriggerSubscriptionParams;
+  };
   userAddress?: string | null;
   selectedTokenAddress?: string;
 }
 
-export async function fetchUserTokens(address: string): Promise<any[]> {
-  const response = await fetch(`/api/getUserTokens?address=${address}`);
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to fetch tokens.');
-  }
-  const data = await response.json();
-  return data.tokens as any[];
-}
-
+type TokensData = Awaited<ReturnType<typeof getUserTokens>>;
 export const TokenList: React.FC<TokenListProps> = ({
-  tokens,
   userAddress,
   selectedTokenAddress,
+  triggers,
+  chainId,
 }) => {
-  const [tokenData, setTokenData] = useState<{
-    [address: string]: { symbol: string; balance: string; decimals: number };
-  }>({});
+  const [tokenData, setTokenData] = useState<TokensData>([]);
 
-  const provider = getProvider("11155111");
+  //const provider = getProvider(chainId);
   const tokenRefs = useRef<{ [key: string]: HTMLLIElement | null }>({});
 
   useEffect(() => {
-    if(!userAddress) return
-    const getTokens = async() => {
+    if (!userAddress) return;
+    const getTokens = async () => {
+      const allUserTokens = (await fetchUserTokens(
+        userAddress,
+        chainId
+      )) as TokensData;
 
-      const allUserTokens = await fetchUserTokens(userAddress)
+      console.log({ allUserTokens, userAddress });
 
-      console.log({ allUserTokens, userAddress })
-    }
+      setTokenData(allUserTokens);
+    };
 
-    getTokens()
-  }, [userAddress])
-  useEffect(() => {
-    (async () => {
-      if (!userAddress) return;
-      try {
-        const tokensData = await fetchInitialTokenData(
-          tokens,
-          userAddress,
-          provider
-        );
-        const updatedData: {
-          [address: string]: {
-            symbol: string;
-            balance: string;
-            decimals: number;
-          };
-        } = {};
-        for (const token of tokens) {
-          const data = tokensData[token];
-          if (!data) continue;
-          updatedData[token] = {
-            symbol: data.symbol,
-            balance: data.balance,
-            decimals: data.decimals,
-          };
-        }
-        setTokenData(updatedData);
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-  }, [tokens, userAddress, provider]);
+    getTokens();
+  }, [userAddress, triggers]);
 
   // Scroll to the selected token when it changes
   useEffect(() => {
@@ -95,28 +63,23 @@ export const TokenList: React.FC<TokenListProps> = ({
       style={{ borderTopWidth: "1px", borderBottomWidth: "1px" }}
     >
       <ul className="flex flex-row space-x-4 overflow-x-auto scrollbar-hide">
-        {tokens.map((token) => {
-          const data = tokenData?.[token];
+        {tokenData.map((token) => {
+          const data = token;
           if (!data) return null;
-          const isSelected = token === selectedTokenAddress;
+          const isSelected = token.address === selectedTokenAddress;
           return (
             <li
-              key={token}
+              key={token.address}
               ref={(el) => {
-                tokenRefs.current[token] = el;
+                tokenRefs.current[token.address?.toLowerCase()] = el;
               }}
               className={`flex flex-col items-center p-2 min-w-[100px] transition-colors duration-200 hover:bg-gray-200 hover:shadow-sm ${
                 isSelected ? "bg-gray-200" : ""
               }`}
               style={{ scrollSnapAlign: "center" }}
             >
-              <ShortenAddress address={token} label={data.symbol} />
-              <Balance
-                tokenAddress={token}
-                symbol={data.symbol}
-                decimals={data.decimals}
-                userAddress={userAddress}
-              />
+              <ShortenAddress address={token.address} label={data.symbol} />
+              <Balance balance={token.balance} decimals={data.decimals || 18} />
             </li>
           );
         })}

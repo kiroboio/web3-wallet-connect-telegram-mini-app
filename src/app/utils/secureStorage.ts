@@ -3,8 +3,6 @@ import { getUserWallet } from "./getUserWallet";
 import { decrypt } from "./encryption";
 import { TriggerSubscriptionParams } from "../events/getEvents";
 
-type Observer = { key: string; callback: (ss: SecureLocalStorage) => void };
-
 export enum SCHEMA {
   PASSWORD = "password",
   ENCRYPTED_PRIVATE_KEY = "encryptedPrivateKey",
@@ -12,6 +10,12 @@ export enum SCHEMA {
   VAULT = "vault",
   TRIGGER = "trigger",
 }
+
+type Observer = {
+  key: string;
+  type: SCHEMA;
+  callback: (ss: SecureLocalStorage) => void;
+};
 
 export class SecureLocalStorage {
   private ls: SecureLS;
@@ -75,7 +79,7 @@ export class SecureLocalStorage {
     if (key === SCHEMA.TRIGGER) return;
 
     this.ls.set(key, value);
-    this.updateSubscriptions();
+    this.updateSubscriptions(key);
   };
 
   public storeTriggerData = (
@@ -96,7 +100,7 @@ export class SecureLocalStorage {
       this.ls.set(key, { [triggerKey]: value });
     }
 
-    this.updateSubscriptions();
+    this.updateSubscriptions(key);
   };
 
   public addTriggerExecution = (
@@ -122,7 +126,7 @@ export class SecureLocalStorage {
     triggers[triggerKey].executions.push(execution);
     this.ls.set(key, triggers);
 
-    this.updateSubscriptions();
+    this.updateSubscriptions(key);
   };
 
   public clearTriggerData = (
@@ -139,10 +143,10 @@ export class SecureLocalStorage {
     console.log({ triggers, triggerKey });
     if (!triggers) return;
 
-    delete triggers[triggerKey]
+    delete triggers[triggerKey];
     this.ls.set(key, triggers);
     console.log({ triggersafterremove: triggers, triggerKey });
-    this.updateSubscriptions();
+    this.updateSubscriptions(key);
   };
 
   public clearAllTriggers = (key: SCHEMA.TRIGGER) => {
@@ -163,8 +167,8 @@ export class SecureLocalStorage {
     return this.ls.get(key);
   };
 
-  public subscribe = ({ key, callback }: Observer) => {
-    this.observers.set(key, { key, callback });
+  public subscribe = ({ key, type, callback }: Observer) => {
+    this.observers.set(key, { key, type, callback });
   };
 
   public clearSubscribtion = ({ key }: { key: string }) => {
@@ -174,8 +178,11 @@ export class SecureLocalStorage {
     this.observers.clear();
   };
 
-  public updateSubscriptions = () => {
-    this.observers.forEach(({ callback }) => callback(this));
+  public updateSubscriptions = (updateType?: SCHEMA) => {
+    this.observers.forEach(({ type, callback }) => {
+      if (updateType && (type !== updateType)) return;
+      callback(this);
+    });
   };
   private observers: Map<string, Observer> = new Map();
 }

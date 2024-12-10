@@ -5,6 +5,7 @@ import type { ParamHanlde, UIType } from "@kiroboio/fct-builder";
 import { Interface } from "ethers/lib/utils";
 import { getSwapQuote } from "./swap/uniswapv2GetAmountOut";
 import { SCHEMA, SecureLocalStorage } from "../utils/secureStorage";
+import { ChainId } from "../utils/alchemy";
 
 export type ExternalVariable = (ParamHanlde & {
   label: string;
@@ -41,6 +42,7 @@ export const getEvents = ({
   socket,
   userId,
   intentId,
+  chainId,
   externalVariables,
   secureLocalStorage
 }: {
@@ -49,6 +51,7 @@ export const getEvents = ({
   socket: Socket | null;
   userId: string;
   intentId: string;
+  chainId: ChainId;
   externalVariables: ExternalVariables;
   secureLocalStorage: SecureLocalStorage;
 }) => ({
@@ -135,7 +138,7 @@ export const getEvents = ({
       if (!token2.decimals) return;
 
       const amountOut = await getSwapQuote?.({
-        chainId: "11155111",
+        chainId,
         fromToken: token1.value,
         fromDecimals: token1.decimals,
         toToken: token2.value,

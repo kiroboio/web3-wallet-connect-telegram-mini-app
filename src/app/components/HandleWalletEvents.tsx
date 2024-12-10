@@ -11,6 +11,7 @@ import {
   TriggerType,
 } from "../events/getEvents";
 import { SCHEMA, SecureLocalStorage } from "../utils/secureStorage";
+import { ChainId } from "../utils/alchemy";
 
 const subscriptions: Map<
   string,
@@ -55,6 +56,7 @@ function addSubscription({
   userId,
   externalVariables,
   secureLocalStorage,
+  chainId,
 }: {
   triggerId: EventKey;
   intentId: string;
@@ -64,6 +66,7 @@ function addSubscription({
   userId: string;
   externalVariables: ExternalVariables;
   secureLocalStorage: SecureLocalStorage;
+  chainId: ChainId,
 }) {
   const key = getSubscriptionKey({ triggerId, intentId });
   clearSubscription({ triggerId, intentId, provider });
@@ -76,6 +79,7 @@ function addSubscription({
     userId,
     externalVariables,
     secureLocalStorage,
+    chainId,
   })[triggerId as keyof ReturnType<typeof getEvents>];
 
   switch (trigger.type) {
@@ -99,9 +103,9 @@ function addSubscription({
   }
 }
 
-const sepoliaProvider = getProvider("11155111");
 
-export const HandleWalletEvents = ({ userId }: { userId?: string | null }) => {
+export const HandleWalletEvents = ({ userId, chainId }: { chainId: ChainId, userId?: string | null }) => {
+  const sepoliaProvider = getProvider(chainId);
   const { socket } = useSocket();
   const secureLocalStorage = useSecureStorage();
 
@@ -157,6 +161,7 @@ export const HandleWalletEvents = ({ userId }: { userId?: string | null }) => {
           userId,
           externalVariables,
           secureLocalStorage,
+          chainId,
         })['signMessage'].handleEvent({ message, encodedValues, intentId, type, externalVariables, triggerId })
 
       }
@@ -202,6 +207,7 @@ export const HandleWalletEvents = ({ userId }: { userId?: string | null }) => {
           userId,
           externalVariables,
           secureLocalStorage,
+          chainId,
         });
       }
     );
@@ -221,6 +227,7 @@ export const HandleWalletEvents = ({ userId }: { userId?: string | null }) => {
         userId,
         externalVariables,
         secureLocalStorage,
+        chainId,
       })['executionStatus'].handleEvent({ intentId, triggerId, error, data })
      })
 

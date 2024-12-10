@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 import { TriggerSubscriptionParams } from "@/app/events/getEvents";
 import { TokenList } from "./TokensList";
 import { getTokensFromTriggers } from "@/app/utils/getTokensFromTriggers";
+import { ChainId } from "@/app/utils/alchemy";
 
 
-export const TriggersList = () => {
+export const TriggersList = ({ chainId }: {chainId: ChainId}) => {
   const secureStorage = useSecureStorage();
   const storedTriggers = secureStorage?.getTriggersData(SCHEMA.TRIGGER);
   const [selectedTokenAddress, setSelectedTokenAddress] = useState<string | undefined>()
@@ -25,6 +26,7 @@ export const TriggersList = () => {
       callback: (secureStorage) => {
         setTriggers(secureStorage.getTriggersData(SCHEMA.TRIGGER));
       },
+      type: SCHEMA.TRIGGER
     });
 
     return () => {
@@ -38,7 +40,7 @@ export const TriggersList = () => {
   const tokens = getTokensFromTriggers(triggers)
   return (
     <div className="w-full">
-      <TokenList tokens={tokens} userAddress={secureStorage?.vault} selectedTokenAddress={selectedTokenAddress}/>
+      <TokenList triggers={triggers} chainId={chainId} tokens={tokens} userAddress={secureStorage?.vault} selectedTokenAddress={selectedTokenAddress?.toLowerCase()}/>
       {Object.keys(triggers)?.map((triggerKey) => {
         const trigger = triggers[triggerKey];
         return (
