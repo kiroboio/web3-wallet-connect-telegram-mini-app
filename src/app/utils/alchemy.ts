@@ -1,6 +1,5 @@
 import { Alchemy, Network } from "alchemy-sdk";
 import { ethers } from "ethers";
-import axios from "axios";
 
 // Interface for token information
 export interface TokenInfo {
@@ -11,12 +10,7 @@ export interface TokenInfo {
   usdBalance: number;
 }
 
-// Minimal ERC20 ABI
-const ERC20_ABI = [
-  "function symbol() view returns (string)",
-  "function decimals() view returns (uint8)",
-  "function balanceOf(address) view returns (uint256)",
-];
+
 type Prices = {
   data: [
     {
@@ -151,12 +145,12 @@ export async function getUserTokens(userAddress: string, chainId: ChainId) {
 export async function fetchUserTokens(
   address: string,
   chainId: ChainId
-): Promise<any[]> {
+): ReturnType<typeof getUserTokens> {
   const response = await fetch(`/api/getUserTokens?address=${address}&chainId=${chainId}`);
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.error || "Failed to fetch tokens.");
   }
   const data = await response.json();
-  return data.tokens as any[];
+  return data.tokens;
 }

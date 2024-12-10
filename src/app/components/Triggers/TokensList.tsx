@@ -1,5 +1,3 @@
-import { getProvider } from "@/app/events/provider/provider";
-import { fetchInitialTokenData } from "@/app/utils/tokens";
 import React, { useEffect, useRef, useState } from "react";
 import { Balance } from "./Balance";
 import { ShortenAddress } from "../ShortenAddress";
@@ -42,7 +40,7 @@ export const TokenList: React.FC<TokenListProps> = ({
     };
 
     getTokens();
-  }, [userAddress, triggers]);
+  }, [userAddress, triggers, chainId]);
 
   // Scroll to the selected token when it changes
   useEffect(() => {

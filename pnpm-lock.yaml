@@ -35,9 +35,6 @@ importers:
       alchemy-sdk:
         specifier: ^3.5.0
         version: 3.5.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      axios:
-        specifier: ^1.7.9
-        version: 1.7.9
       classnames:
         specifier: ^2.5.1
         version: 2.5.1

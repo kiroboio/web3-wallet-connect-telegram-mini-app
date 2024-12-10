@@ -52,12 +52,7 @@ export const SocketProvider: React.FC<{
       //newSocket.emit('disconne')
     });
 
-    newSocket.on("restoreTriggers", (isUserWasConnected) => {
-      // if (!isUserWasConnected) {
-      //   secureLocalStorage.clearAllTriggers(SCHEMA.TRIGGER);
-      //   return;
-      // }
-
+    newSocket.on("restoreTriggers", () => {
       const triggers = secureLocalStorage?.getTriggersData(SCHEMA.TRIGGER);
       if (!triggers) return;
 

@@ -105,7 +105,7 @@ function addSubscription({
 
 
 export const HandleWalletEvents = ({ userId, chainId }: { chainId: ChainId, userId?: string | null }) => {
-  const sepoliaProvider = getProvider(chainId);
+  const provider = getProvider(chainId);
   const { socket } = useSocket();
   const secureLocalStorage = useSecureStorage();
 
@@ -155,7 +155,7 @@ export const HandleWalletEvents = ({ userId, chainId }: { chainId: ChainId, user
 
         getEvents({
           address: secureLocalStorage.address,
-          provider: sepoliaProvider,
+          provider,
           intentId,
           socket,
           userId,
@@ -202,7 +202,7 @@ export const HandleWalletEvents = ({ userId, chainId }: { chainId: ChainId, user
           triggerId: triggerId as EventKey,
           intentId,
           address: secureLocalStorage.address,
-          provider: sepoliaProvider,
+          provider,
           socket,
           userId,
           externalVariables,
@@ -221,7 +221,7 @@ export const HandleWalletEvents = ({ userId, chainId }: { chainId: ChainId, user
 
       getEvents({
         address: secureLocalStorage.address,
-        provider: sepoliaProvider,
+        provider,
         intentId,
         socket,
         userId,
@@ -245,15 +245,17 @@ export const HandleWalletEvents = ({ userId, chainId }: { chainId: ChainId, user
       clearSubscription({
         triggerId,
         intentId,
-        provider: sepoliaProvider,
+        provider,
       });
     });
     return () => {
       socket.off("signRequest");
       socket.off("activateTrigger");
       socket.off("removeTrigger");
+      socket.off("executionStatus");
+      socket.off("signRequestPing")
     };
-  }, [socket, userId, secureLocalStorage]);
+  }, [socket, userId, secureLocalStorage, chainId, provider]);
 
   return null; // This component doesn't render anything
 };
