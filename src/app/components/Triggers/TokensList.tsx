@@ -3,11 +3,22 @@ import { fetchInitialTokenData } from "@/app/utils/tokens";
 import React, { useEffect, useRef, useState } from "react";
 import { Balance } from "./Balance";
 import { ShortenAddress } from "../ShortenAddress";
+import { getUserTokens } from "@/app/utils/alchemy";
 
 interface TokenListProps {
   tokens: string[];
   userAddress?: string | null;
   selectedTokenAddress?: string;
+}
+
+export async function fetchUserTokens(address: string): Promise<any[]> {
+  const response = await fetch(`/api/getUserTokens?address=${address}`);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to fetch tokens.');
+  }
+  const data = await response.json();
+  return data.tokens as any[];
 }
 
 export const TokenList: React.FC<TokenListProps> = ({
@@ -22,6 +33,17 @@ export const TokenList: React.FC<TokenListProps> = ({
   const provider = getProvider("11155111");
   const tokenRefs = useRef<{ [key: string]: HTMLLIElement | null }>({});
 
+  useEffect(() => {
+    if(!userAddress) return
+    const getTokens = async() => {
+
+      const allUserTokens = await fetchUserTokens(userAddress)
+
+      console.log({ allUserTokens, userAddress })
+    }
+
+    getTokens()
+  }, [userAddress])
   useEffect(() => {
     (async () => {
       if (!userAddress) return;

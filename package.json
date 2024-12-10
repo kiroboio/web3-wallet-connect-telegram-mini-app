@@ -17,6 +17,8 @@
     "@uniswap/sdk-core": "5.9.0",
     "@uniswap/smart-order-router": "3.5.0",
     "@uniswap/v2-sdk": "^4.7.0",
+    "alchemy-sdk": "^3.5.0",
+    "axios": "^1.7.9",
     "classnames": "^2.5.1",
     "daisyui": "^4.12.14",
     "ethers": "5.7.2",
