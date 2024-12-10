@@ -53,10 +53,10 @@ export const SocketProvider: React.FC<{
     });
 
     newSocket.on("restoreTriggers", (isUserWasConnected) => {
-      if (!isUserWasConnected) {
-        secureLocalStorage.clearAllTriggers(SCHEMA.TRIGGER);
-        return;
-      }
+      // if (!isUserWasConnected) {
+      //   secureLocalStorage.clearAllTriggers(SCHEMA.TRIGGER);
+      //   return;
+      // }
 
       const triggers = secureLocalStorage?.getTriggersData(SCHEMA.TRIGGER);
       if (!triggers) return;
