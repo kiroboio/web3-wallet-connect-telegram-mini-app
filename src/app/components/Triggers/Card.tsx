@@ -27,7 +27,7 @@ export const TriggerCard = ({
   return (
     <div className="p-4">
       <div
-        className="card w-full bg-gray-100 border-gray-300 rounded-md p-4 mb-4"
+        className="w-full bg-gray-100 border-gray-300 rounded-md  mb-4"
         style={{ borderWidth: "1px" }}
       >
         <div className="card-body">
@@ -53,7 +53,7 @@ export const TriggerCard = ({
                   })}
                 </div>
               </Toggle>
-              <div className="py-2">
+              <div>
                 {trigger.executions && trigger.executions.length > 0 && (
                   <Toggle label="executions" initValue={true}>
                     <div className="mt-4">

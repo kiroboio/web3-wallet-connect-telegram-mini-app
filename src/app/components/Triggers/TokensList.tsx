@@ -77,7 +77,7 @@ export const TokenList: React.FC<TokenListProps> = ({
               style={{ scrollSnapAlign: "center" }}
             >
               <ShortenAddress address={token.address} label={data.symbol} />
-              <Balance balance={token.balance} decimals={data.decimals || 18} />
+              <Balance balance={token.balance} decimals={data.decimals || 18} usdBalance={data.usdBalance} />
             </li>
           );
         })}

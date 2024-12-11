@@ -1,13 +1,12 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { VariableItem } from "./VariableItem";
-
-import { FaPlus, FaMinus } from "react-icons/fa";
 import {
   ExternalVariable,
   TriggerSubscriptionParams,
 } from "@/app/events/getEvents";
 import parse from "html-react-parser";
 import "./ExecutionItem.css";
+import { Toggle } from "../Toggle";
 interface ExecutionComponentProps {
   execution: TriggerSubscriptionParams["executions"][number];
   setSelectedTokenAddress?: Dispatch<SetStateAction<string | undefined>>;
@@ -21,10 +20,9 @@ export const ExecutionItem: React.FC<ExecutionComponentProps> = ({
 }) => {
   const error = execution.error;
   const success = execution.status === "succeed";
-  const [showVariables, setShowVariables] = useState(false);
   const readableTime = new Date(execution.time).toLocaleString();
 
-  let containerClass = "rounded-lg p-3 transition-colors duration-200";
+  let containerClass = "rounded-lg p-2 transition-colors duration-200";
 
   if (error) {
     containerClass += " bg-red-100 border-2 border-red-300";
@@ -34,22 +32,7 @@ export const ExecutionItem: React.FC<ExecutionComponentProps> = ({
 
   return (
     <div className={containerClass}>
-      <div className="font-semibold flex items-center">
-        <button
-          className="mr-2 p-1 rounded hover:bg-gray-100 transition-colors"
-          onClick={() => setShowVariables(!showVariables)}
-          title={showVariables ? "Hide Variables" : "Show Variables"}
-        >
-          {showVariables ? (
-            <FaMinus className="h-4 w-4" />
-          ) : (
-            <FaPlus className="h-4 w-4" />
-          )}
-        </button>
-        {readableTime}
-      </div>
-
-      {showVariables && (
+      <Toggle label={readableTime}>
         <>
           <div className="mt-2 space-y-2">
             {execution.values?.map((val: ExternalVariable) => (
@@ -66,7 +49,7 @@ export const ExecutionItem: React.FC<ExecutionComponentProps> = ({
             </div>
           ) : null}
         </>
-      )}
+      </Toggle>
     </div>
   );
 };
