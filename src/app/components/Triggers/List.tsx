@@ -1,7 +1,7 @@
 import { useSecureStorage } from "@/app/context/SecureStorageProvider";
 import { SCHEMA } from "@/app/utils/secureStorage";
 import { TriggerCard } from "./Card";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TriggerSubscriptionParams } from "@/app/events/getEvents";
 import { TokenList } from "./TokensList";
 import { getTokensFromTriggers } from "@/app/utils/getTokensFromTriggers";
@@ -10,17 +10,17 @@ import { ChainId } from "@/app/utils/alchemy";
 
 export const TriggersList = ({ chainId }: {chainId: ChainId}) => {
   const secureStorage = useSecureStorage();
-  const storedTriggers = secureStorage?.getTriggersData(SCHEMA.TRIGGER);
+  const storedTriggers = useRef(secureStorage?.getTriggersData(SCHEMA.TRIGGER));
   const [selectedTokenAddress, setSelectedTokenAddress] = useState<string | undefined>()
   const [triggers, setTriggers] = useState<
     | {
         [key: string]: TriggerSubscriptionParams;
       }
     | undefined
-  >(storedTriggers);
+  >(storedTriggers.current);
 
   useEffect(() => {
-    //setTriggers(storedTriggers);
+    setTriggers(storedTriggers.current);
     secureStorage?.subscribe({
       key: "triggers_list",
       callback: (secureStorage) => {

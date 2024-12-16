@@ -71,16 +71,20 @@ function addSubscription({
   const key = getSubscriptionKey({ triggerId, intentId });
   clearSubscription({ triggerId, intentId, provider });
 
-  const trigger = getEvents({
+  const triggers = getEvents({
     address,
     provider,
     intentId,
+    triggerId,
     socket,
     userId,
     externalVariables,
     secureLocalStorage,
     chainId,
-  })[triggerId as keyof ReturnType<typeof getEvents>];
+  })
+  const triggerKey = Object.keys(triggers).find((key) => triggerId.includes(key))
+
+  const trigger = triggers[triggerKey as keyof ReturnType<typeof getEvents>]
 
   switch (trigger.type) {
     case "swap":
@@ -157,6 +161,7 @@ export const HandleWalletEvents = ({ userId, chainId }: { chainId: ChainId, user
           address: secureLocalStorage.address,
           provider,
           intentId,
+          triggerId,
           socket,
           userId,
           externalVariables,
@@ -223,6 +228,7 @@ export const HandleWalletEvents = ({ userId, chainId }: { chainId: ChainId, user
         address: secureLocalStorage.address,
         provider,
         intentId,
+        triggerId,
         socket,
         userId,
         externalVariables,

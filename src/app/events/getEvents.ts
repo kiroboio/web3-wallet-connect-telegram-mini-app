@@ -42,6 +42,7 @@ export const getEvents = ({
   socket,
   userId,
   intentId,
+  triggerId,
   chainId,
   externalVariables,
   secureLocalStorage
@@ -51,6 +52,7 @@ export const getEvents = ({
   socket: Socket | null;
   userId: string;
   intentId: string;
+  triggerId: string;
   chainId: ChainId;
   externalVariables: ExternalVariables;
   secureLocalStorage: SecureLocalStorage;
@@ -156,7 +158,7 @@ export const getEvents = ({
       //secureLocalStorage?.addTriggerExecution(SCHEMA.TRIGGER, { intentId, triggerId: 'protectedSwap', execution: { time: new Date(), values: externalVariables }})
       socket?.emit("triggerProtectedSwap", {
         userId: Number(userId),
-        triggerId: "protectedSwap",
+        triggerId,
         intentId,
         externalVariables,
       });

@@ -30,7 +30,7 @@ export const TriggerCard = ({
         className="w-full bg-gray-100 border-gray-300 rounded-md  mb-4"
         style={{ borderWidth: "1px" }}
       >
-        <div className="card-body">
+        <div className="card-body p-6">
           <h2 className="card-title">
             {convertToSentenceCase(trigger.triggerId)}
           </h2>
@@ -38,7 +38,7 @@ export const TriggerCard = ({
             ID: <ShortenAddress address={trigger.intentId} title="Intent Id" />
           </div>
           {sortedVariables.length > 0 && (
-            <div>
+            <div className="bg-inherit">
               <Toggle label="inputs">
                 <div className="mt-4 space-y-2">
                   {sortedVariables.map((variable) => {

@@ -58,7 +58,8 @@ export const TokenList: React.FC<TokenListProps> = ({
   return (
     <div
       className="sticky top-0 max-w-full bg-white border-gray-300 shadow"
-      style={{ borderTopWidth: "1px", borderBottomWidth: "1px" }}
+      style={{ borderTopWidth: "1px", borderBottomWidth: "1px", zIndex: 100 }}
+      
     >
       <ul className="flex flex-row space-x-4 overflow-x-auto scrollbar-hide">
         {tokenData.map((token) => {
